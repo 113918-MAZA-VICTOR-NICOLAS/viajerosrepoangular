@@ -15,7 +15,8 @@ import { MisBancosComponent } from './profilecomponents/mis-bancos/mis-bancos.co
 import { MiCuentaComponent } from './profilecomponents/mi-cuenta/mi-cuenta.component';
 import { VehicleComponent } from './profilecomponents/vehicle/vehicle.component';
 import { VehicleEditComponent } from './profilecomponents/vehicle-edit/vehicle-edit.component';
-import { MisMascotasComponent } from './mis-mascotas/mis-mascotas.component';
+import { MisMascotasComponent } from './profilecomponents/mis-mascotas/mis-mascotas.component';
+import { EditMascotaComponent } from './profilecomponents/edit-mascota/edit-mascota.component';
 
 export const routes: Routes = [{
     path: 'home',
@@ -78,6 +79,11 @@ export const routes: Routes = [{
 {
     path: 'mis-mascotas',
     component: MisMascotasComponent,
+    canActivate: [authGuard],
+},
+{
+    path: 'edit-mascotas',
+    component: EditMascotaComponent,
     canActivate: [authGuard],
 },
 {

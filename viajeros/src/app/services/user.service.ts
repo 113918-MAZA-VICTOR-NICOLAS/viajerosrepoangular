@@ -5,6 +5,7 @@ import { NewUserDto } from '../models/NewUserDto';
 import { EditProfileResponseDto } from '../models/User/EditProfileResponseDto';
 import { UpdateUserRequestDto } from '../models/UpdateUserRequestDto';
 import Swal from 'sweetalert2';
+import { UserDataDto } from '../models/User/UserDataDto';
 
 @Injectable({
   providedIn: 'root'
@@ -53,6 +54,39 @@ export class UserService {
       })
     );
   }
+  getUserDataById(): Observable<UserDataDto> {
+    const token = localStorage.getItem('token');
+    const id = localStorage.getItem('userId');
+    if (!token) {
+      return throwError(() => new Error('Token no encontrado.'));
+    }
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<UserDataDto>(`${this.apiUrl}/dataUser/${id}`, { headers });
+  }
+  getUserData(): Observable<EditProfileResponseDto> {
+
+    const token = localStorage.getItem('token'); // Obtén el token desde el localStorage
+
+    const id = localStorage.getItem('userId');
+    // Verifica si el token está presente
+    if (!token) {
+      console.error('No token found in localStorage');
+      return throwError(() => new Error('No token found')); // Lanza un error si no hay token
+    }
+
+    // Crea un objeto HttpHeaders y añade el header Authorization usando set
+    const headers = new HttpHeaders()
+      .set('Authorization', `Bearer ${token}`); // Usa set para agregar el header
+
+    // Realiza la solicitud GET con el header
+    return this.http.get<any>(`${this.apiUrl}/getuserdata/${id}`, { headers }).pipe(
+      catchError((error) => {
+        console.error('Error fetching user for edit', error);
+        return throwError(() => error); // Lanza el error
+      })
+    );
+
+  }
   getUserForEdit(id: number): Observable<EditProfileResponseDto> {
     const token = localStorage.getItem('token'); // Obtén el token desde el localStorage
 
@@ -83,7 +117,7 @@ export class UserService {
       console.error('Token no encontrado. Asegúrate de haber iniciado sesión.');
       return throwError(() => new Error('Token no encontrado.'));
     }
-  
+
     return new Observable((observer) => {
       // Mostrar confirmación con SweetAlert
       Swal.fire({
@@ -110,7 +144,7 @@ export class UserService {
               Swal.fire("Actualizado!", "El usuario ha sido actualizado correctamente.", "success");
               observer.next(response); // Emitir el éxito
               observer.complete();
-              
+
             },
             error: (error) => {
               observer.error(error); // Emitir el error
@@ -123,7 +157,7 @@ export class UserService {
       });
     });
   }
-  
+
 
 
 

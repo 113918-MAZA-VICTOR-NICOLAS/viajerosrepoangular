@@ -60,7 +60,7 @@ export class MisBancosComponent {
       this.userService.updateUser(+id, this.updateUserRequestDto).subscribe(
         (response) => {
           console.log('User updated successfully', response);
-          this.router.navigate(['/profile']); // Redirigir a algún lugar después de la actualización
+          this.router.navigate(['/edit-profile']); // Redirigir a algún lugar después de la actualización
         },
         (error) => {
           console.error('Error updating user', error);

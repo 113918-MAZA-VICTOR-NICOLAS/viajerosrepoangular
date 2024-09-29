@@ -2,10 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { PetService } from '../services/pet.service';
-import { PetResponseDto } from '../models/Mascotas/PetResponseDto';
-import { NewPetRequestDto } from '../models/Mascotas/NewPetRequestDto';
 import Swal from 'sweetalert2';
+import { NewPetRequestDto } from '../../models/Mascotas/NewPetRequestDto';
+import { PetResponseDto } from '../../models/Mascotas/PetResponseDto';
+import { PetService } from '../../services/pet.service';
 
 @Component({
   selector: 'app-mis-mascotas',
@@ -21,8 +21,9 @@ export class MisMascotasComponent {
 
   constructor(private petservice:PetService, private fb: FormBuilder, private router: Router) {
     this.petUpdate = this.fb.group({
-      typeId: ['', Validators.required],
-      sizeId: ['', [Validators.required]],
+      idType: ['', Validators.required],
+      idSize: ['', [Validators.required]],
+      name: ['', [Validators.required]],
       canil: ['', [Validators.required]]
     });
   }
@@ -76,9 +77,9 @@ export class MisMascotasComponent {
 
 
   // Función para editar un vehículo
-  editPet(pet: any) {
+  editPet(pet: PetResponseDto) {
     this.petservice.setPetForEdit(pet);
-    this.router.navigate(['/vehicle-edit']);
+    this.router.navigate(['/edit-mascotas']);
   }
 
   // Función para borrar un vehículo

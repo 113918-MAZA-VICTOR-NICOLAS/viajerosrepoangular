@@ -29,7 +29,9 @@ export class PetService {
   setPetForEdit(pet: any) {
     this.petForEdit = pet;
   }
-
+  getPetForEdit() {
+    return this.petForEdit;
+  }
   // Obtener todas las mascotas de un usuario
   getAllPetsByUser(): Observable<PetResponseDto[]> {
     const headers = this.getAuthHeaders();  // Obtener los headers actualizados con el token
@@ -54,6 +56,12 @@ export class PetService {
     const headers = this.getAuthHeaders();
 
     return this.http.delete<PetResponseDto>(`${this.apiUrl}/delete/${idPet}`, { headers })
+  }
+
+  updatePet(newPetRequest: PetResponseDto): Observable<PetResponseDto> {
+
+    const headers = this.getAuthHeaders();
+    return this.http.put<PetResponseDto>(`${this.apiUrl}/update/${newPetRequest.idPet}`, newPetRequest, { headers });
   }
 
 }

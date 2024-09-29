@@ -10,7 +10,7 @@
             @for (item of listPet; track $index) {
             <div class="form-group">
                 <button class="form-control d-flex justify-content-between align-items-center">
-                    <span>{{item.typeName| uppercase}} {{item.sizeName| uppercase}}</span>
+                    <span>{{item.name| uppercase}}</span>
                     <span>
                         <!-- Ícono de editar de Bootstrap -->
                         <i class="bi bi-pencil-square text-success me-3" (click)="editPet(item)"></i>
@@ -33,18 +33,28 @@
         <form [formGroup]="petUpdate" (ngSubmit)="submitPetForm()">
             <div class="p-4 pt-1">
                 <h1 class="p-1" style="font-size: 2.4rem; font-weight: bold;">Agregar mascota</h1>
+                <div class="text-start mt-4">
+                    <label for="name" class="form-label">NOMBRE</label>
+                    <input formControlName="name" class="form-control mb-0"
+                        [ngClass]="{'is-valid': petUpdate.get('name')?.valid && petUpdate.get('name')?.touched, 
+                                   'is-invalid': petUpdate.get('name')?.invalid && petUpdate.get('name')?.touched}" required>
+                    <div *ngIf="petUpdate.get('name')?.invalid && petUpdate.get('name')?.touched"
+                        class="text-danger">
+                        El nombre es requerido
+                    </div>
+                </div>
                 <!-- Tipo (type) -->
                 <div class="text-start mt-4">
-                    <label for="type" class="form-label">TIPO DE MASCOTA</label>
-                    <select formControlName="typeId" class="form-control mb-0"
-                        [ngClass]="{'is-valid': petUpdate.get('typeId')?.valid && petUpdate.get('typeId')?.touched, 
-                                           'is-invalid': petUpdate.get('type')?.invalid && petUpdate.get('typeId')?.touched}" required>
+                    <label for="idType" class="form-label">TIPO DE MASCOTA</label>
+                    <select formControlName="idType" class="form-control mb-0"
+                        [ngClass]="{'is-valid': petUpdate.get('idType')?.valid && petUpdate.get('idType')?.touched, 
+                                           'is-invalid': petUpdate.get('idType')?.invalid && petUpdate.get('idType')?.touched}" required>
                         <option value="" disabled selected>Selecciona un tipo</option>
                         <option [ngValue]="1">Perro</option>
                         <option [ngValue]="2">Gato</option>
                         <option [ngValue]="3">Otro</option>
                     </select>
-                    <div *ngIf="petUpdate.get('typeId')?.invalid && petUpdate.get('typeId')?.touched" class="text-danger">
+                    <div *ngIf="petUpdate.get('idType')?.invalid && petUpdate.get('idType')?.touched" class="text-danger">
                         Selecciona un tipo de mascota.
                     </div>
                 </div>
@@ -52,15 +62,15 @@
                 <!-- Tamaño (size) -->
                 <div class="text-start mt-4">
                     <label for="size" class="form-label">TAMAÑO</label>
-                    <select formControlName="sizeId" class="form-control mb-0"
-                        [ngClass]="{'is-valid': petUpdate.get('sizeId')?.valid && petUpdate.get('sizeId')?.touched, 
-                                           'is-invalid': petUpdate.get('sizeId')?.invalid && petUpdate.get('sizeId')?.touched}" required>
+                    <select formControlName="idSize" class="form-control mb-0"
+                        [ngClass]="{'is-valid': petUpdate.get('idSize')?.valid && petUpdate.get('idSize')?.touched, 
+                                           'is-invalid': petUpdate.get('idSize')?.invalid && petUpdate.get('idSize')?.touched}" required>
                         <option value="" disabled selected>Selecciona un tamaño</option>
                         <option [ngValue]="1">Chico</option>
                         <option [ngValue]="2">Mediano</option>
                         <option [ngValue]="3">Grande</option>
                     </select>
-                    <div *ngIf="petUpdate.get('sizeId')?.invalid && petUpdate.get('sizeId')?.touched" class="text-danger">
+                    <div *ngIf="petUpdate.get('idSize')?.invalid && petUpdate.get('idSize')?.touched" class="text-danger">
                         Selecciona un tamaño.
                     </div>
                 </div>
