@@ -1,0 +1,14 @@
+.history{
+
+    font-family: "DM Sans", sans-serif;
+    color: rgb(0, 0, 0);
+    font-weight: 300; /* Asegúrate de que sea un valor válido (100 a 900) */
+    font-size: xx-large;
+}
+
+.home{
+    background-image: url(../../assets/ruta.jpg);
+    width: 100%;
+    height: 100vh;
+    background-size: cover;
+}
