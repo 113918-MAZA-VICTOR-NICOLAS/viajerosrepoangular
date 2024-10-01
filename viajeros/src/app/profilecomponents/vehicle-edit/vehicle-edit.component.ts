@@ -17,8 +17,8 @@ import { CommonModule } from '@angular/common';
 export class VehicleEditComponent {
 
   updateCar: FormGroup;
-  newvehiclerequest!: NewCarRequestDto;
-  carselected!: CarResponseDto;
+  newvehiclerequest!: CarResponseDto ;
+  carselected!: CarResponseDto | undefined; // Ahora puede ser undefined
 
   constructor(private vehicleService: VehicleService, private fb: FormBuilder, private router: Router) {
     this.updateCar = this.fb.group({
@@ -44,10 +44,15 @@ export class VehicleEditComponent {
 
   submitCarForm() {
     // Asignar los valores del formulario a la variable newvehiclerequest
-    this.newvehiclerequest = this.updateCar.value;
-
+    if (this.updateCar.valid && this.carselected) {
+      // Asignar los valores del formulario a newvehiclerequest, manteniendo el idCar del vehículo seleccionado
+      this.newvehiclerequest = {
+        ...this.updateCar.value,
+        idCar: this.carselected.idCar, // Asegurar que idCar se mantenga
+        deleted: this.carselected.deleted // Mantener el valor de 'deleted' si es relevante
+      };
     // Llamar al servicio para registrar el vehículo
-    this.vehicleService.registerNewVehicle(this.newvehiclerequest).subscribe(
+    this.vehicleService.updateVehicle(this.newvehiclerequest).subscribe(
       (response) => {
         // Manejo de respuesta exitosa
         Swal.fire("Éxito", "El vehículo ha sido actualizado con éxito", "success");
@@ -63,5 +68,5 @@ export class VehicleEditComponent {
     );
   }
 
-
+}
 }

@@ -13,78 +13,105 @@ import { LoginService } from './login.service';
 export class VehicleService {
 
 
-  private apiUrl = 'http://localhost:8080/api/vehicle';  // Cambiar a la URL correcta
+  private readonly apiUrl = 'http://localhost:8080/api/vehicle';  // Cambiar a la URL correcta
+  private carForEdit!: CarResponseDto;
 
-  constructor(private http: HttpClient, private loginService: LoginService) { }
+  constructor(private http: HttpClient, private loginService: LoginService) {}
 
-  carForEdit!: CarResponseDto;
-  setCarForEdit(carResponseDto: CarResponseDto) {
+  setCarForEdit(carResponseDto: CarResponseDto): void {
     this.carForEdit = carResponseDto;
   }
 
-  getCarForEdit() {
+  getCarForEdit(): CarResponseDto | undefined {
     return this.carForEdit;
   }
 
   registerNewVehicle(newVehicle: NewCarRequestDto): Observable<CarResponseDto> {
-    const token = localStorage.getItem('token');
-    const id = localStorage.getItem('userId');
+    const headers = this.getAuthHeaders();
 
-    if (!token || !id) {
-      Swal.fire("Error", "Token o ID de usuario no encontrado.", "error");
+    if (!headers) {
+      this.showError("Token o ID de usuario no encontrado.");
       return throwError(() => new Error('Token o ID de usuario no encontrado.'));
     }
 
-    newVehicle.userId = parseInt(id, 10);
-
-
-    const headers = new HttpHeaders()
-      .set('Authorization', `Bearer ${token}`)
-      .set('Content-Type', 'application/json');
+    newVehicle.userId = this.getUserId();
 
     return this.http.post<CarResponseDto>(`${this.apiUrl}/register`, newVehicle, { headers })
       .pipe(
-        catchError((error) => {
-          console.error('Error al registrar el vehículo', error);
-          Swal.fire("Error", "Hubo un problema al registrar el vehículo", "error");
-          return throwError(() => error);
-        })
+        catchError((error) => this.handleError('registrar el vehículo', error))
       );
-
-
   }
 
+  getAllCars(): Observable<CarResponseDto[]> {
+    const headers = this.getAuthHeaders();
 
-  getAllcars() {
-    const token = localStorage.getItem('token');
-    const id = localStorage.getItem('userId');
-
-    if (!token || !id) {
-      Swal.fire("Error", "Token o ID de usuario no encontrado.", "error");
+    if (!headers) {
+      this.showError("Token o ID de usuario no encontrado.");
       return throwError(() => new Error('Token o ID de usuario no encontrado.'));
     }
-   
-    const headers = new HttpHeaders()
-      .set('Authorization', `Bearer ${token}`);
 
-    return this.http.get<CarResponseDto[]>(`${this.apiUrl}/userVehicles/${id}`, { headers }) // Cambiar a Array
+    return this.http.get<CarResponseDto[]>(`${this.apiUrl}/userVehicles/${this.getUserId()}`, { headers })
       .pipe(
-        catchError((error) => {
-          console.error('Error al obtener los vehículos del usuario', error); // Cambiar el mensaje de error
-          Swal.fire("Error", "Hubo un problema al obtener los vehículos del usuario", "error");
-          return throwError(() => error);
-        })
+        catchError((error) => this.handleError('obtener los vehículos del usuario', error))
       );
   }
-  deleteCar(idCar: number) {
 
-    const token = localStorage.getItem('token');
-  
-    const headers = new HttpHeaders()
-      .set('Authorization', `Bearer ${token}`);
+  deleteCar(idCar: number): Observable<CarResponseDto> {
+    const headers = this.getAuthHeaders();
+
+    if (!headers) {
+      this.showError("Token no encontrado.");
+      return throwError(() => new Error('Token no encontrado.'));
+    }
 
     return this.http.delete<CarResponseDto>(`${this.apiUrl}/delete/${idCar}`, { headers })
+      .pipe(
+        catchError((error) => this.handleError('eliminar el vehículo', error))
+      );
   }
 
+  // Métodos privados reutilizables para obtener el token y el userId
+  private getAuthHeaders(): HttpHeaders | null {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return null;
+    }
+    return new HttpHeaders()
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+  }
+
+  private getUserId(): number {
+    const id = localStorage.getItem('userId');
+    return id ? parseInt(id, 10) : 0;
+  }
+
+  // Manejo centralizado de errores
+  private handleError(action: string, error: any): Observable<never> {
+    console.error(`Error al ${action}:`, error);
+    Swal.fire("Error", `Hubo un problema al ${action}`, "error");
+    return throwError(() => error);
+  }
+
+  // Método para mostrar errores en SweetAlert
+  private showError(message: string): void {
+    Swal.fire("Error", message, "error");
+  }
+
+  updateVehicle(updatedVehicle: CarResponseDto): Observable<CarResponseDto> {
+    const headers = this.getAuthHeaders();
+  console.log(updatedVehicle)
+    if (!headers) {
+      this.showError("Token no encontrado.");
+      return throwError(() => new Error('Token no encontrado.'));
+    }
+  
+    return this.http.put<CarResponseDto>(`${this.apiUrl}/update/${updatedVehicle.idCar}`, updatedVehicle, { headers })
+      .pipe(
+        catchError((error) => this.handleError('actualizar el vehículo', error))
+      );
+  }
+  
+  
 }
 

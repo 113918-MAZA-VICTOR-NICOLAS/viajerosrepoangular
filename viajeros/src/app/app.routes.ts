@@ -17,6 +17,7 @@ import { VehicleComponent } from './profilecomponents/vehicle/vehicle.component'
 import { VehicleEditComponent } from './profilecomponents/vehicle-edit/vehicle-edit.component';
 import { MisMascotasComponent } from './profilecomponents/mis-mascotas/mis-mascotas.component';
 import { EditMascotaComponent } from './profilecomponents/edit-mascota/edit-mascota.component';
+import { NewTripComponent } from './new-trip/new-trip.component';
 
 export const routes: Routes = [{
     path: 'home',
@@ -89,6 +90,11 @@ export const routes: Routes = [{
 {
     path: 'edit-profile',
     component: EditProfileComponent,
+    canActivate: [authGuard],
+},
+{
+    path: 'new-trip',
+    component: NewTripComponent,
     canActivate: [authGuard],
 },
 {

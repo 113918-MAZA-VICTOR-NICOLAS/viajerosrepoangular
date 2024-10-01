@@ -37,8 +37,9 @@ export class VehicleComponent {
   }
 
   loadVehicleList() {
-    this.vehicleService.getAllcars().subscribe(
+    this.vehicleService.getAllCars().subscribe(
       (response) => {
+        console.log(this.listVehicles)
         this.listVehicles = response;
       },
       (error) => {
@@ -93,7 +94,7 @@ export class VehicleComponent {
       confirmButtonText: "Eliminar"
     }).then((result) => {
       if (result.isConfirmed) {
-
+console.log(vehicle)
         this.vehicleService.deleteCar(vehicle.idCar).subscribe(
           (response) => {
             this.loadVehicleList();

@@ -5,13 +5,16 @@
         <div class="align-items-center rounded-5  border shadow-lg p-4 m-4 text-center bg-white ">
 
             <h1 class=" pb-0 text-center" style="font-size: 50px; font-weight: bold;">Perfil</h1>
-            <div class="d-flex flex-column align-items-center">
-                <img src="../../assets/men.jpg" alt="" class="rounded-5 m-1 img-fluid icono-responsive"
-                    style="max-width: 100px; max-height: 100px;">
-                <label for="" class="dmsans-subtitle" style="font-size: 100%;">{{userdata?.name}}
-                    {{userdata?.lastname}}</label>
-            </div>
-
+            @if(userdata){
+                <div class="d-flex flex-column align-items-center">
+                    <img src="../../assets/men.jpg" alt="" class="rounded-5 m-1 img-fluid icono-responsive"
+                        style="max-width: 100px; max-height: 100px;">
+                    <label for="" class="dmsans-subtitle" style="font-size: 100%;">{{userdata.name}}
+                        {{userdata.lastname}}</label>
+                </div>
+    
+            }
+          
 
             <div class="row d-flex justify-content-center align-items-center">
                 <div class="col-auto p-0"><img src="../../assets/star_yellow.png" alt="" class="rounded-5"
