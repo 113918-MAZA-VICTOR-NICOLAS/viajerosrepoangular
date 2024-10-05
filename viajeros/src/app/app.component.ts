@@ -5,11 +5,12 @@ import { RegisterComponent } from "./register/register.component";
 import { PrincipalComponent } from "./principal/principal.component";
 import { VehicleComponent } from "./profilecomponents/vehicle/vehicle.component";
 import { EditProfileComponent } from "./edit-profile/edit-profile.component";
+import { ViajesBuscadosComponent } from "./viajes-buscados/viajes-buscados.component";
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, HomeComponent, RegisterComponent, PrincipalComponent, VehicleComponent, EditProfileComponent],
+  imports: [RouterOutlet, HomeComponent, RegisterComponent, PrincipalComponent, VehicleComponent, EditProfileComponent, ViajesBuscadosComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

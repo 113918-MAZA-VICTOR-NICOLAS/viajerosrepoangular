@@ -21,9 +21,13 @@ export class ViajeService {
   }
 
   // Método para registrar un viaje
-  registerTrip(newTrip: NewTripRequestDto): Observable<any> {
-    const headers = this.getAuthHeaders();
-    return this.http.post(`${this.apiUrl}/register`, newTrip, { headers });
-  }
+// Método para registrar un viaje
+registerTrip(newTrip: NewTripRequestDto): Observable<string> {
+  const headers = this.getAuthHeaders();  // Método para obtener los headers con autenticación
+  return this.http.post<string>(`${this.apiUrl}/register`, newTrip, {
+    headers,
+    responseType: 'text' as 'json'  // Indica que esperas texto como respuesta
+  });
+}
 
 }
