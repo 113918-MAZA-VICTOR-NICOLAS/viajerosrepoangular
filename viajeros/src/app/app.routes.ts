@@ -19,6 +19,7 @@ import { MisMascotasComponent } from './profilecomponents/mis-mascotas/mis-masco
 import { EditMascotaComponent } from './profilecomponents/edit-mascota/edit-mascota.component';
 import { NewTripComponent } from './new-trip/new-trip.component';
 import { SearchTripComponent } from './search-trip/search-trip.component';
+import { ViajesBuscadosComponent } from './viajes-buscados/viajes-buscados.component';
 
 export const routes: Routes = [{
     path: 'home',
@@ -101,6 +102,11 @@ export const routes: Routes = [{
 {
     path: 'search-trip',
     component: SearchTripComponent,
+    canActivate: [authGuard],
+},
+{
+    path: 'viajes-buscados',
+    component: ViajesBuscadosComponent,
     canActivate: [authGuard],
 },
 {

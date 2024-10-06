@@ -5,7 +5,9 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import Swal from 'sweetalert2';
 import { GeocodingService } from '../services/geocoding.service';
 import { LocalidadService } from '../services/localidad.service';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { routes } from '../app.routes';
+import { ViajeService } from '../services/viaje.service';
 
 @Component({
   selector: 'app-search-trip',
@@ -35,7 +37,9 @@ export class SearchTripComponent  implements OnInit {
   constructor(
     private fb: FormBuilder,
     private localidadService: LocalidadService,
-    private geocodingService: GeocodingService
+    private geocodingService: GeocodingService,
+    private router: Router,
+    private viajesService: ViajeService
   ) {
     this.searchTripForm = this.fb.group({
       origen: ['', Validators.required],
@@ -87,7 +91,7 @@ export class SearchTripComponent  implements OnInit {
     const destinoSeleccionado = this.searchTripForm.get('destino')?.value;
 
     if (origenSeleccionado && destinoSeleccionado) {
-      this.calcularDistanciaYTiempo();
+      this.calculateDistanceAndTime();
     }
   }
   // Método para buscar la latitud y longitud de la localidad de origen
@@ -137,16 +141,62 @@ export class SearchTripComponent  implements OnInit {
   }
 
   // Método para calcular la distancia y tiempo entre origen y destino
-  calcularDistanciaYTiempo() {
-    if (this.originLat && this.originLng && this.destinationLat && this.destinationLng) {
-      // Aquí deberías implementar la lógica o usar un servicio para calcular la distancia y tiempo.
-      // Por ejemplo, puedes usar Google Maps Distance Matrix API o calcular la distancia basada en coordenadas.
-      // De manera simplificada, puedes asignar valores simulados:
-      this.travelDistance = '200 km';  // Ejemplo de distancia simulada
-      this.travelTime = '3 horas';     // Ejemplo de tiempo estimado
+  calculateDistanceAndTime() {
+    const origen = this.searchTripForm.get('origen')?.value;
+    const destino = this.searchTripForm.get('destino')?.value;
+
+    // Verifica si origen y destino no están vacíos
+    if (origen && destino) {
+      this.geocodingService.getDistanceAndTime(origen, destino).subscribe(response => {
+        if (response.status === 'OK') {
+          const element = response.rows[0].elements[0];
+          this.travelDistance = element.distance.text;
+          this.travelTime = element.duration.text;
+          console.log(`Distancia: ${this.travelDistance}, Tiempo: ${this.travelTime}`);
+        } else {
+          console.error('Error al obtener la distancia y el tiempo', response.status);
+        }
+      }, error => {
+        console.error('Error en la solicitud', error);
+      });
+    } else {
+      // Mostrar mensaje de error si alguno de los campos está vacío
+      console.error('Origen y destino son requeridos');
+      Swal.fire('Error', 'Debes completar ambos campos: Origen y Destino', 'error');
     }
   }
-  submitSearchTripForm(){
+  submitSearchTripForm() {
+    const viajesRequestMatchDto = {
+      origin: this.searchTripForm.get('origen')?.value,
+      destination: this.searchTripForm.get('destino')?.value,
+      fechaHoraInicio: this.searchTripForm.get('fechaHoraInicio')?.value,
+      petsAllowed: this.searchTripForm.get('aceptaMascotas')?.value,
+      equipajePermitido: this.searchTripForm.get('equipajePermitido')?.value,
+      smokersAllowed: this.searchTripForm.get('aceptaFumar')?.value,
+      localidadInicioId: this.searchTripForm.get('localidadInicioId')?.value,
+      localidadFinId: this.searchTripForm.get('localidadFinId')?.value
+    };
+  console.log(viajesRequestMatchDto)
+     // Llamar al servicio para buscar viajes
+  this.viajesService.buscarViajes(viajesRequestMatchDto).subscribe({
+    next: (response) => {
+      if (response && response.length > 0) {
+        console.log(response)
+        // Guardar los resultados en el servicio o redirigir
+        this.viajesService.setResultadosBusqueda(response); // O puedes redirigir y pasar datos como desees
 
+        // Redirigir al componente de resultados
+        this.router.navigate(['/viajes-buscados']);
+      } else {
+        // Si no se encuentran resultados, mostrar un mensaje
+        Swal.fire('Sin resultados', 'No se encontraron viajes con los criterios especificados.', 'info');
+      }
+    },
+    error: (error) => {
+      console.error('Error en la búsqueda de viajes', error);
+      Swal.fire('Error', 'Ocurrió un problema al realizar la búsqueda.', 'error');
+    }
+  });
   }
+  
 }

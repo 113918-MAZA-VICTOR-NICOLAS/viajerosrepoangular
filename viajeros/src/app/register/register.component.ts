@@ -27,7 +27,7 @@ export class RegisterComponent {
       phone: ['', Validators.required]
     });
   }
- 
+
   checkPasswords() {
     const password = this.registerForm.get('password')?.value;
     const passwordConfirm = this.registerForm.get('passwordConfirm')?.value;
@@ -39,43 +39,51 @@ export class RegisterComponent {
       console.error('Las contraseñas no coinciden.');
       return;
     }
-
+  
     const newUserData = {
       name: this.registerForm.get('name')?.value,
       email: this.registerForm.get('email')?.value,
       password: this.registerForm.get('password')?.value,
       phone: Number(this.registerForm.get('phone')?.value) // Asegúrate de que sea un número
     };
-
+  
+    console.log(newUserData);
   
     this.userService.registerNewUser(newUserData).subscribe(
       (response) => {
+        console.log('Usuario registrado con éxito:', response);
+  
+        // Mostrar Swal y luego redirigir después de un pequeño retraso
         Swal.fire({
           position: "center",
           icon: "success",
           title: "Registrado",
           showConfirmButton: false,
           timer: 1500
+        }).then(() => {
+          // Redirigir después de que Swal se cierre
+          this.router.navigate(['/home']);
         });
-        this.router.navigate(['/home']);
+  
       }, (error) => {
         const registerComprobationDto: RegisterComprobationDto = error.error;
-
-        if(registerComprobationDto.mailAlreadyExist){
+        console.log('Error de registro:', error);
+  
+        if (registerComprobationDto.mailAlreadyExist) {
           Swal.fire({
             icon: "error",
             title: "Correo ya existente",
             footer: '<a href="/passRecovery">¿Olvidaste tu contraseña?</a>'
           });
-        }else if(registerComprobationDto.phoneAlreadyExist){
+        } else if (registerComprobationDto.phoneAlreadyExist) {
           Swal.fire({
             icon: "error",
             title: "Telefono ya existente",
             footer: '<a href="/passRecovery">¿Olvidaste tu contraseña?</a>'
           });
         }
-   
-    });
-
+      }
+    );
   }
+  
 }

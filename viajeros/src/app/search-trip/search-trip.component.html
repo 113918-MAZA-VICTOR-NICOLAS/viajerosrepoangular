@@ -19,7 +19,7 @@
                     <div *ngIf="localidadesOrigen.length" class="suggestions-container position-absolute w-100 shadow-sm rounded">
                         <ul class="list-group">
                             <li class="list-group-item" *ngFor="let localidad of localidadesOrigen"
-                                (click)="selectLocalidad('origen', localidad)">
+                                (click)="selectLocalidad('origen', localidad)" (click)="searchLocalidadOrigen()">
                                 {{ localidad.nombre }}
                             </li>
                         </ul>
@@ -37,7 +37,7 @@
                     <div *ngIf="localidadesDestino.length" class="suggestions-container position-absolute w-100 shadow-sm rounded">
                         <ul class="list-group">
                             <li class="list-group-item" *ngFor="let localidad of localidadesDestino"
-                                (click)="selectLocalidad('destino', localidad)">
+                                (click)="selectLocalidad('destino', localidad)" (click)="searchLocalidadDestino()">
                                 {{ localidad.nombre }}
                             </li>
                         </ul>
@@ -68,10 +68,10 @@
                     <label for="equipajePermitido" class="form-label">¿CANTIDAD DE EQUIPAJE?</label><br>
                     <select formControlName="equipajePermitido" class="form-control mb-0" required>
                         <option value="" disabled selected>Seleccionar opción</option>
-                        <option [value]="'Ninguno'">Ninguno</option>
-                        <option [value]="'Pequeño'">Pequeño</option>
-                        <option [value]="'Mediano'">Mediano</option>
-                        <option [value]="'Grande'">Grande</option>
+                        <option [value]="0">Ninguno</option>
+                        <option [value]="1">Pequeño</option>
+                        <option [value]="2">Mediano</option>
+                        <option [value]="3">Grande</option>
                     </select>
                 </div>
 

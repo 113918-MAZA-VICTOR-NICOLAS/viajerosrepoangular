@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class GeocodingService {
 
-  private apiKey = 'AIzaSyAp7qvSsoJReyHBsiZxz-2xkcZ3axQ4gMI';  // Reemplaza con tu clave de Google Maps API
+  private apiKey = 'AIzaSyBashs0F2jJ24miPysl_t7gQnrs3l0DAF8';  // Reemplaza con tu clave de Google Maps API
   private geocodingUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
   private distanceMatrixUrl = 'https://maps.googleapis.com/maps/api/distancematrix/json';
 

@@ -1,116 +1,107 @@
 <div class="container d-flex align-items-center justify-content-center min-vh-100">
-    <div class="align-items-center rounded-3 shadow-lg p-4 m-4 text-center bg-white w-100">
-        <h1 class="p-1" style="font-size: 2.4rem; font-weight: bold;">Viajes que coinciden</h1>
-        <label class="dmsans">Aquí puedes encontrar los viajes que coinciden con tu búsqueda</label><br>
-        <div class="row mt-4 d-flex justify-content-center">
-        <!-- Listado de Cards de Viajes -->
-        <div class="card shadow-sm mb-4 bg-light border-0 rounded-3 mx-2"
-            style="width: 20rem; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.03)'"
-            onmouseout="this.style.transform='scale(1)'">
-            <div class="card-body text-center">
-                <h5 class="card-title mb-3">Origen: Rosario <br> Destino: Mendoza</h5>
-                <p class="card-text mb-1"><strong>Chofer:</strong> Juan Pérez</p>
-                <p class="card-text mb-1"><strong>Lugares libres:</strong> <span class="" style="color: red;"> 2</span>
-                </p>
-                <p class="card-text mb-3"><strong>Fecha:</strong> Jueves 3 de octubre de 2024 a las 09:00 AM</p>
+  <div class="align-items-center rounded-3 shadow-lg p-4 m-4 text-center bg-white w-100">
+    <label class="py-2"><a [routerLink]="'/search-trip'">Volver</a></label>
+    <h1 class="p-1" style="font-size: 2.4rem; font-weight: bold;">Viajes que coinciden</h1>
+    <label class="dmsans">Aquí puedes encontrar los viajes que coinciden con tu búsqueda</label><br>
+    <div class="row mt-4 d-flex justify-content-center">
+      <!-- Listado de Cards de Viajes -->
+      @for (trip of matchListrip; track $index) {
+      <div class="card shadow-sm mb-4 bg-light border-0 rounded-3 mx-2"
+        style="width: 20rem; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.03)'"
+        onmouseout="this.style.transform='scale(1)'">
+        <div class="card-body text-center">
+    <!-- Origen -->
+  <!-- Origen -->
+<div class="mb-3">
+  <label for="origenInput" class="d-block mb-2" style="font-weight: bold;">Origen</label>
+  <input id="origenInput" type="button" value="{{trip.origin}}" class="form-control btn-form" readonly>
+</div>
 
-                <!-- Estrellas de calificación y Botón Ver Más en línea -->
-                <div class="d-flex justify-content-between align-items-center">
-                    <!-- Estrellas de calificación -->
-                    <div class="d-flex">
-                        <div class="p-0"><img src="../../assets/star_yellow.png" alt="star" class="rounded-5"
-                                style="width: 20px; height: 20px;"></div>
-                        <div class="p-0"><img src="../../assets/star_yellow.png" alt="star" class="rounded-5"
-                                style="width: 20px; height: 20px;"></div>
-                        <div class="p-0"><img src="../../assets/star_yellow.png" alt="star" class="rounded-5"
-                                style="width: 20px; height: 20px;"></div>
-                        <div class="p-0"><img src="../../assets/star_gray.png" alt="star" class="rounded-5"
-                                style="width: 20px; height: 20px;"></div>
-                        <div class="p-0"><img src="../../assets/star_gray.png" alt="star" class="rounded-5"
-                                style="width: 20px; height: 20px;"></div>
-                    </div>
+<!-- Destino -->
+<div class="mb-3">
+  <label for="destinoInput" class="d-block mb-2" style="font-weight: bold;">Destino</label>
+  <input id="destinoInput" type="button" value="{{trip.destination}}" class="form-control btn-form" readonly>
+</div>
 
-                    <!-- Botón Ver Más -->
-                    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#tripDetailsModal">
-                        Ver más
-                    </button>
+
+          <p class="card-text mb-1"><strong>Chofer:</strong> {{trip.driverName}}</p>
+          <p class="card-text mb-1"><strong>Lugares libres:</strong> <span class="" style="color: red;">
+              {{trip.availableSeats}}</span></p>
+          <p class="card-text mb-1"><strong>Fecha:</strong> {{ trip.departureTime | date: 'EEEE d MMMM y' }}</p>
+          <p class="card-text mb-3"><strong>Vehiculo:</strong> {{trip.vehicleName}}</p>
+
+
+          <!-- Estrellas de calificación y Botón Ver Más en línea -->
+          <div class="d-flex justify-content-between align-items-center">
+            <!-- Estrellas de calificación -->
+            <div class="d-flex">
+              <!-- Mostrar estrellas amarillas según el rating -->
+              <ng-container *ngFor="let star of [].constructor(trip.driverRating); let i = index">
+                <div class="p-0">
+                  <img src="../../assets/star_yellow.png" alt="star" class="rounded-5" style="width: 20px; height: 20px;">
                 </div>
+              </ng-container>
+            
+              <!-- Mostrar estrellas grises para el resto (hasta 5 estrellas) -->
+              <ng-container *ngFor="let star of [].constructor(5 - trip.driverRating); let i = index">
+                <div class="p-0">
+                  <img src="../../assets/star_gray.png" alt="star" class="rounded-5" style="width: 20px; height: 20px;">
+                </div>
+              </ng-container>
             </div>
+            
+
+            <!-- Botón Ver Más -->
+            <button class="btn btn-outline-primary btn-sm">Ver más</button>
+          </div>
         </div>
+      </div>
+      }
+
     </div>
 
-        <h1 class="p-1" style="font-size: 2.4rem; font-weight: bold;">Viajes que pueden interesarte</h1>
-        <label class="dmsans">Viajes cercanos a tu fecha de salida o lugar de salida</label><br>
+    <h1 class="p-1" style="font-size: 2.4rem; font-weight: bold;">Viajes que pueden interesarte</h1>
+    <label class="dmsans">Viajes cercanos a tu fecha de salida o lugar de salida</label><br>
 
-        <div class="row mt-4 d-flex justify-content-center">
-            <!-- Ejemplo de card -->
-            <div class="card shadow-sm mb-4 bg-light border-0 rounded-3 mx-2"
-                style="width: 20rem; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.03)'"
-                onmouseout="this.style.transform='scale(1)'">
-                <div class="card-body text-center">
-                    <h5 class="card-title mb-3">Origen: Rosario <br> Destino: Mendoza</h5>
-                    <p class="card-text mb-1"><strong>Chofer:</strong> Juan Pérez</p>
-                    <p class="card-text mb-1"><strong>Lugares libres:</strong> <span class="" style="color: red;">
-                            2</span></p>
-                    <p class="card-text mb-3"><strong>Fecha:</strong> Jueves 3 de octubre de 2024 a las 09:00 AM</p>
+    <div class="row mt-4 d-flex justify-content-center">
+      <!-- Ejemplo de card -->
 
-                    <!-- Estrellas de calificación y Botón Ver Más en línea -->
-                    <div class="d-flex justify-content-between align-items-center">
-                        <!-- Estrellas de calificación -->
-                        <div class="d-flex">
-                            <div class="p-0"><img src="../../assets/star_yellow.png" alt="star" class="rounded-5"
-                                    style="width: 20px; height: 20px;"></div>
-                            <div class="p-0"><img src="../../assets/star_yellow.png" alt="star" class="rounded-5"
-                                    style="width: 20px; height: 20px;"></div>
-                            <div class="p-0"><img src="../../assets/star_yellow.png" alt="star" class="rounded-5"
-                                    style="width: 20px; height: 20px;"></div>
-                            <div class="p-0"><img src="../../assets/star_gray.png" alt="star" class="rounded-5"
-                                    style="width: 20px; height: 20px;"></div>
-                            <div class="p-0"><img src="../../assets/star_gray.png" alt="star" class="rounded-5"
-                                    style="width: 20px; height: 20px;"></div>
-                        </div>
 
-                        <!-- Botón Ver Más -->
-                        <button class="btn btn-outline-primary btn-sm">Ver más</button>
-                    </div>
-                </div>
+      <div class="card shadow-sm mb-4 bg-light border-0 rounded-3 mx-2"
+        style="width: 20rem; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.03)'"
+        onmouseout="this.style.transform='scale(1)'">
+        <div class="card-body text-center">
+          <h5 class="card-title mb-3">Origen: Rosario <br> Destino: Mendoza</h5>
+          <p class="card-text mb-1"><strong>Chofer:</strong> Juan Pérez</p>
+          <p class="card-text mb-1"><strong>Lugares libres:</strong> <span class="" style="color: red;">
+              2</span></p>
+          <p class="card-text mb-3"><strong>Fecha:</strong> Jueves 3 de octubre de 2024 a las 09:00 AM</p>
+
+          <!-- Estrellas de calificación y Botón Ver Más en línea -->
+          <div class="d-flex justify-content-between align-items-center">
+            <!-- Estrellas de calificación -->
+            <div class="d-flex">
+              <div class="p-0"><img src="../../assets/star_yellow.png" alt="star" class="rounded-5"
+                  style="width: 20px; height: 20px;"></div>
+              <div class="p-0"><img src="../../assets/star_yellow.png" alt="star" class="rounded-5"
+                  style="width: 20px; height: 20px;"></div>
+              <div class="p-0"><img src="../../assets/star_yellow.png" alt="star" class="rounded-5"
+                  style="width: 20px; height: 20px;"></div>
+              <div class="p-0"><img src="../../assets/star_gray.png" alt="star" class="rounded-5"
+                  style="width: 20px; height: 20px;"></div>
+              <div class="p-0"><img src="../../assets/star_gray.png" alt="star" class="rounded-5"
+                  style="width: 20px; height: 20px;"></div>
             </div>
 
-            <div class="card shadow-sm mb-4 bg-light border-0 rounded-3 mx-2"
-                style="width: 20rem; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.03)'"
-                onmouseout="this.style.transform='scale(1)'">
-                <div class="card-body text-center">
-                    <h5 class="card-title mb-3">Origen: Rosario <br> Destino: Mendoza</h5>
-                    <p class="card-text mb-1"><strong>Chofer:</strong> Juan Pérez</p>
-                    <p class="card-text mb-1"><strong>Lugares libres:</strong> <span class="" style="color: red;">
-                            2</span></p>
-                    <p class="card-text mb-3"><strong>Fecha:</strong> Jueves 3 de octubre de 2024 a las 09:00 AM</p>
-
-                    <!-- Estrellas de calificación y Botón Ver Más en línea -->
-                    <div class="d-flex justify-content-between align-items-center">
-                        <!-- Estrellas de calificación -->
-                        <div class="d-flex">
-                            <div class="p-0"><img src="../../assets/star_yellow.png" alt="star" class="rounded-5"
-                                    style="width: 20px; height: 20px;"></div>
-                            <div class="p-0"><img src="../../assets/star_yellow.png" alt="star" class="rounded-5"
-                                    style="width: 20px; height: 20px;"></div>
-                            <div class="p-0"><img src="../../assets/star_yellow.png" alt="star" class="rounded-5"
-                                    style="width: 20px; height: 20px;"></div>
-                            <div class="p-0"><img src="../../assets/star_gray.png" alt="star" class="rounded-5"
-                                    style="width: 20px; height: 20px;"></div>
-                            <div class="p-0"><img src="../../assets/star_gray.png" alt="star" class="rounded-5"
-                                    style="width: 20px; height: 20px;"></div>
-                        </div>
-
-                        <!-- Botón Ver Más -->
-                        <button class="btn btn-outline-primary btn-sm">Ver más</button>
-                    </div>
-                </div>
-            </div>
-
-
+            <!-- Botón Ver Más -->
+            <button class="btn btn-outline-primary btn-sm">Ver más</button>
+          </div>
         </div>
+      </div>
+
+
     </div>
+  </div>
 </div>
 
 
@@ -118,63 +109,66 @@
 
 <!-- Modal -->
 <div class="modal fade" id="tripDetailsModal" tabindex="-1" aria-labelledby="tripDetailsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content bg-light shadow-lg rounded-3">
-        <div class="modal-header">
-          <h5 class="modal-title" id="tripDetailsModalLabel">Detalles del Viaje</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-light shadow-lg rounded-3">
+      <div class="modal-header">
+        <h5 class="modal-title" id="tripDetailsModalLabel">Detalles del Viaje</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <hr class="mb-3" style="height: 1px; border: none; background-color: #ccc;">
+
+        <!-- Origen, Flecha y Destino -->
+        <div class="d-flex justify-content-center align-items-center mb-3">
+          <!-- Contenedor para Origen -->
+          <div class="d-flex flex-column align-items-center" style="width: 40%;">
+            <label for="">ORIGEN</label>
+            <div class="form-control bg-white text-center border-0 shadow-sm mb-0" style="font-weight: bold;">Buenos
+              Aires</div>
+          </div>
+
+          <!-- Flecha -->
+          <img src="../../assets/flecha_red.png" alt="flecha" class="mx-2" style="width: 30px; height: 30px;">
+
+          <!-- Contenedor para Destino -->
+          <div class="d-flex flex-column align-items-center" style="width: 40%;">
+            <label for="">DESTINO</label>
+            <div class="form-control bg-white text-center border-0 shadow-sm mb-0" style="font-weight: bold;">Córdoba
+            </div>
+          </div>
         </div>
-        <div class="modal-body text-center">
-          <hr class="mb-3" style="height: 1px; border: none; background-color: #ccc;">
-  
-  <!-- Origen, Flecha y Destino -->
-<div class="d-flex justify-content-center align-items-center mb-3">
-    <!-- Contenedor para Origen -->
-    <div class="d-flex flex-column align-items-center" style="width: 40%;">
-      <label for="">ORIGEN</label>
-      <div class="form-control bg-white text-center border-0 shadow-sm mb-0" style="font-weight: bold;">Buenos Aires</div>
-    </div>
-  
-    <!-- Flecha -->
-    <img src="../../assets/flecha_red.png" alt="flecha" class="mx-2" style="width: 30px; height: 30px;">
-  
-    <!-- Contenedor para Destino -->
-    <div class="d-flex flex-column align-items-center" style="width: 40%;">
-      <label for="">DESTINO</label>
-      <div class="form-control bg-white text-center border-0 shadow-sm mb-0" style="font-weight: bold;">Córdoba</div>
-    </div>
-  </div>
-  
-  
-          <!-- Fecha centrada con fondo negro -->
-          <div class="d-flex justify-content-center align-items-center mb-3">
-          <div class="form-control bg-dark text-white text-center border-0 shadow-sm mb-3" style="width: 80%; font-weight: bold;">
+
+
+        <!-- Fecha centrada con fondo negro -->
+        <div class="d-flex justify-content-center align-items-center mb-3">
+          <div class="form-control bg-dark text-white text-center border-0 shadow-sm mb-3"
+            style="width: 80%; font-weight: bold;">
             Domingo 22 de septiembre de 2024
           </div>
         </div>
-          <hr class="mb-3 mt-3" style="height: 1px; border: none; background-color: #ccc;">
-  
-          <!-- Otros datos con menos interlineado -->
-          <div class="text-start ms-3">
-            <p class="mb-1"><strong>Horario de salida:</strong> 08:30</p>
-            <p class="mb-1"><strong>Horario de llegada:</strong> 17:50</p>
-            <p class="mb-1"><strong>Tiempo aproximado:</strong> 8hs</p>
-            <p class="mb-1"><strong>Mascotas:</strong> Sí</p>
-            <p class="mb-1"><strong>Fumadores:</strong> No</p>
-            <p class="mb-1"><strong>Vehículo:</strong> Ford EcoSport</p>
-            <p class="mb-1 text-center"><strong>Lugares disponibles: </strong> <span style="font-size: 1.5rem; color: red;">3</span></p>
-          </div>
-  
-          <!-- Mapa de Google Maps -->
-          <div class="mb-3 mt-4">
-            <app-google-maps [origin]="{ lat: originLat, lng: originLng }" [destination]="{ lat: destinationLat, lng: destinationLng }"></app-google-maps>
-          </div>
+        <hr class="mb-3 mt-3" style="height: 1px; border: none; background-color: #ccc;">
+
+        <!-- Otros datos con menos interlineado -->
+        <div class="text-start ms-3">
+          <p class="mb-1"><strong>Horario de salida:</strong> 08:30</p>
+          <p class="mb-1"><strong>Horario de llegada:</strong> 17:50</p>
+          <p class="mb-1"><strong>Tiempo aproximado:</strong> 8hs</p>
+          <p class="mb-1"><strong>Mascotas:</strong> Sí</p>
+          <p class="mb-1"><strong>Fumadores:</strong> No</p>
+          <p class="mb-1"><strong>Vehículo:</strong> Ford EcoSport</p>
+          <p class="mb-1 text-center"><strong>Lugares disponibles: </strong> <span
+              style="font-size: 1.5rem; color: red;">3</span></p>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary btn-lg w-100">Chatear y Subirme</button>
+
+        <!-- Mapa de Google Maps -->
+        <div class="mb-3 mt-4">
+          <app-google-maps [origin]="{ lat: originLat, lng: originLng }"
+            [destination]="{ lat: destinationLat, lng: destinationLng }"></app-google-maps>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary btn-lg w-100">Chatear y Subirme</button>
       </div>
     </div>
   </div>
-  
-  
+</div>
