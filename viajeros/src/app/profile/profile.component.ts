@@ -5,11 +5,13 @@ import { Route, Router, RouterLink } from '@angular/router';
 import { UserService } from '../services/user.service';
 import { UserDataDto } from '../models/User/UserDataDto';
 import Swal from 'sweetalert2';
+import { CommonModule } from '@angular/common';
+import { UserSummaryDto } from '../models/User/UserSummaryDto';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [PhoneNavbarComponent, RouterLink],
+  imports: [PhoneNavbarComponent, RouterLink, CommonModule],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
@@ -19,7 +21,7 @@ export class ProfileComponent {
     name: 'Juan Lopez',
     history: 'Me gusta viajar con compania',
   }
-
+  userSummary: UserSummaryDto | undefined;
   userdata!: UserDataDto;
 
   constructor(private loginservice: LoginService, private routes: Router, private userservice: UserService) { }
@@ -34,6 +36,11 @@ export class ProfileComponent {
       },
       (error) => { console.log(error) }
     );
+
+    this.userservice.getUserSummary().subscribe({
+      next: (data) => this.userSummary = data,
+      error: (err) => console.error('Error loading user summary', err)
+    });
   }
 
   logout() {

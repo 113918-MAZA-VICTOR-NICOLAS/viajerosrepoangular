@@ -9,8 +9,7 @@
                 <div class="d-flex flex-column align-items-center">
                     <img src="../../assets/men.jpg" alt="" class="rounded-5 m-1 img-fluid icono-responsive"
                         style="max-width: 100px; max-height: 100px;">
-                    <label for="" class="dmsans-subtitle" style="font-size: 100%;">{{userdata.name}}
-                        {{userdata.lastname}}</label>
+                    <label for="" class="dmsans-subtitle" style="font-size: 100%;">{{userSummary?.fullName}}</label>
                 </div>
     
             }
@@ -31,13 +30,12 @@
             <div class="p-4">
                 <button class="btn btn-red btn-lg poppins-bold my-3" (click)="logout()">Cerrar sesion</button>
                 <button class="btn btn-black btn-lg poppins-bold mb-3" [routerLink]="'/edit-profile'">Editar perfil</button>
-                <button class="btn btn-black btn-lg poppins-bold mb-3" [routerLink]="'/edit-profile'">Mis viajes</button>
+                <button class="btn btn-black btn-lg poppins-bold mb-3" [routerLink]="'/mis-viajes'">Mis viajes</button>
             
 
                 <div class="">
-                    <p class="p-1 text-start">Viajes realizados:</p>
-                    <p class="p-1 text-start">Viajes pendientes:</p>
-                    <p class="p-1 text-start">Viajes cancelados:</p>
+                    <p class="p-1 text-start mb-0">Viajes realizados: {{userSummary?.completedTrips}}</p>
+                    <p class="p-1 text-start">Viajes pendientes: {{userSummary?.pendingTrips}}</p>
                 </div>
 
 

@@ -1,11 +1,12 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { catchError, Observable, throwError } from 'rxjs';
+import { BehaviorSubject, catchError, Observable, throwError } from 'rxjs';
 import { NewUserDto } from '../models/NewUserDto';
 import { EditProfileResponseDto } from '../models/User/EditProfileResponseDto';
 import { UpdateUserRequestDto } from '../models/UpdateUserRequestDto';
 import Swal from 'sweetalert2';
 import { UserDataDto } from '../models/User/UserDataDto';
+import { UserSummaryDto } from '../models/User/UserSummaryDto';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +17,18 @@ export class UserService {
   private apiUrl = 'http://localhost:8080/api/user'; // Cambia por la URL de tu backend
 
   constructor(private http: HttpClient) { }
+
+
+  private passengerIdSubject = new BehaviorSubject<number | null>(null);
+
+  passengerId$ = this.passengerIdSubject.asObservable();
+
+
+  setPassengerId(userId: string) {
+
+    this.passengerIdSubject.next(+userId);
+  }
+
 
   registerNewUser(newuserdata: NewUserDto): Observable<any> {
     return this.http.post(this.apiUrl + '/register', newuserdata);
@@ -160,7 +173,24 @@ export class UserService {
 
 
 
+  getUserSummary(): Observable<UserSummaryDto> {
+    const token = localStorage.getItem('token');
 
+    const userId = localStorage.getItem('userId');
+    if (!token) {
+      return throwError(() => new Error('Token no encontrado.'));
+    }
+
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+    return this.http.get<UserSummaryDto>(`${this.apiUrl}/${userId}/summary`, { headers })
+      .pipe(
+        catchError((error) => {
+          console.error('Error fetching user summary', error);
+          return throwError(() => error);
+        })
+      );
+  }
 
 
 

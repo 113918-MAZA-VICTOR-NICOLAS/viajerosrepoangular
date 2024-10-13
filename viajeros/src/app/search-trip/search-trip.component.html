@@ -1,8 +1,11 @@
 <div class="container d-flex align-items-center justify-content-center min-vh-100">
     <div class="align-items-center rounded-3 shadow-lg p-4 m-4 text-center bg-white">
+        <div class="p-4 pt-0">
+            <button type="button" class="btn btn-black btn-lg poppins-bold" (click)="alltrips()">Ver todos los viajes</button>
+        </div>
         <h1 class="p-1" style="font-size: 2.4rem; font-weight: bold;">Buscar viajes</h1>
         <label class="dmsans">Busca viajes disponibles según selección</label><br>
-
+      
         <label class="py-2"><a [routerLink]="'/principal'">Volver</a></label>
 
         <form [formGroup]="searchTripForm" (ngSubmit)="submitSearchTripForm()">

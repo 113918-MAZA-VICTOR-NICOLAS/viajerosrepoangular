@@ -9,7 +9,6 @@ export class GeocodingService {
 
   private apiKey = 'AIzaSyBashs0F2jJ24miPysl_t7gQnrs3l0DAF8';  // Reemplaza con tu clave de Google Maps API
   private geocodingUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
-  private distanceMatrixUrl = 'https://maps.googleapis.com/maps/api/distancematrix/json';
 
   constructor(private http: HttpClient) { }
 

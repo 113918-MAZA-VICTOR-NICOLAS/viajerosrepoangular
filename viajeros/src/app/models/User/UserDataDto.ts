@@ -118,5 +118,6 @@ export class Vehicle {
       this.pets = pets;
       this.valuations = valuations;
     }
+    
   }
   

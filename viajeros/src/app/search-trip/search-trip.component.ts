@@ -16,7 +16,7 @@ import { ViajeService } from '../services/viaje.service';
   templateUrl: './search-trip.component.html',
   styleUrl: './search-trip.component.css'
 })
-export class SearchTripComponent  implements OnInit {
+export class SearchTripComponent implements OnInit {
   originLat = -34.6037; // Coordenada de ejemplo (Buenos Aires)
   originLng = -58.3816;
 
@@ -53,7 +53,7 @@ export class SearchTripComponent  implements OnInit {
     });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 
   // Método para buscar localidades
   searchLocalidades(campo: string): void {
@@ -176,27 +176,33 @@ export class SearchTripComponent  implements OnInit {
       localidadInicioId: this.searchTripForm.get('localidadInicioId')?.value,
       localidadFinId: this.searchTripForm.get('localidadFinId')?.value
     };
-  console.log(viajesRequestMatchDto)
-     // Llamar al servicio para buscar viajes
-  this.viajesService.buscarViajes(viajesRequestMatchDto).subscribe({
-    next: (response) => {
-      if (response && response.length > 0) {
-        console.log(response)
-        // Guardar los resultados en el servicio o redirigir
-        this.viajesService.setResultadosBusqueda(response); // O puedes redirigir y pasar datos como desees
+    console.log(viajesRequestMatchDto)
+    // Llamar al servicio para buscar viajes
 
-        // Redirigir al componente de resultados
-        this.router.navigate(['/viajes-buscados']);
-      } else {
-        // Si no se encuentran resultados, mostrar un mensaje
-        Swal.fire('Sin resultados', 'No se encontraron viajes con los criterios especificados.', 'info');
+    this.viajesService.saveRequestBusqueda(viajesRequestMatchDto);
+    this.viajesService.buscarViajesorigenydestino(viajesRequestMatchDto).subscribe({
+      next: (response) => {
+        if (response && response.length > 0) {
+          console.log(response)
+
+
+          // Redirigir al componente de resultados
+          this.router.navigate(['/viajes-buscados']);
+        } else {
+          // Si no se encuentran resultados, mostrar un mensaje
+          Swal.fire('Sin resultados', 'No se encontraron viajes con los criterios especificados.', 'info');
+        }
+      },
+      error: (error) => {
+        console.error('Error en la búsqueda de viajes', error);
+        Swal.fire('Error', 'Ocurrió un problema al realizar la búsqueda.', 'error');
       }
-    },
-    error: (error) => {
-      console.error('Error en la búsqueda de viajes', error);
-      Swal.fire('Error', 'Ocurrió un problema al realizar la búsqueda.', 'error');
-    }
-  });
+    });
   }
-  
+
+  alltrips(){
+    this.viajesService.serFlagAllTrips();
+    this.router.navigate(['/viajes-buscados']);
+  }
+
 }

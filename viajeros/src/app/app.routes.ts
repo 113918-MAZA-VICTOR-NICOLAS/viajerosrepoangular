@@ -20,16 +20,19 @@ import { EditMascotaComponent } from './profilecomponents/edit-mascota/edit-masc
 import { NewTripComponent } from './new-trip/new-trip.component';
 import { SearchTripComponent } from './search-trip/search-trip.component';
 import { ViajesBuscadosComponent } from './viajes-buscados/viajes-buscados.component';
+import { MisViajesComponent } from './mis-viajes/mis-viajes.component';
+import { ChatComponent } from './chat/chat.component';
+import { SubirmeComponent } from './subirme/subirme.component';
 
 export const routes: Routes = [{
     path: 'home',
     component: HomeComponent,
-    canActivate: [noAuthGuard] 
+    canActivate: [noAuthGuard]
 },
 {
     path: 'register',
     component: RegisterComponent,
-    canActivate: [noAuthGuard] 
+    canActivate: [noAuthGuard]
 },
 {
     path: 'profile',
@@ -58,11 +61,11 @@ export const routes: Routes = [{
 },
 {
     path: 'vehicle',
-    component:VehicleComponent
+    component: VehicleComponent
 },
 {
     path: 'vehicle-edit',
-    component:VehicleEditComponent
+    component: VehicleEditComponent
 },
 {
     path: 'mis-datos',
@@ -108,6 +111,20 @@ export const routes: Routes = [{
     path: 'viajes-buscados',
     component: ViajesBuscadosComponent,
     canActivate: [authGuard],
+},
+{
+    path: 'subirme/:tripId',
+    component: SubirmeComponent,
+    canActivate: [authGuard],
+},
+{
+    path: 'mis-viajes',
+    component: MisViajesComponent,
+    canActivate: [authGuard],
+},
+{
+    path: 'chat/:tripId',
+    component: ChatComponent
 },
 {
     path: '',

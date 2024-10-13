@@ -22,8 +22,8 @@
                     <label for="pass" class="form-label">PASSWORD</label>
                     <input #pass="ngModel" type="password" name="pass" class="form-control mb-0"
                         [(ngModel)]="login.pass" required
-                        [ngClass]="{'is-valid': pass.valid && (pass.touched || pass.dirty), 'is-invalid': pass.invalid && (pass.touched || pass.dirty)}">
-
+                        [ngClass]="{'is-valid': pass.valid && (pass.touched || pass.dirty), 'is-invalid': pass.invalid && (pass.touched || pass.dirty)}"
+                        (keydown.enter)="onSubmit()"> <!-- Escucha la tecla Enter para enviar el formulario -->
                         @if(pass.getError('required') && pass.dirty){
                         <p class="text-danger">El password es requerido</p>
                         }

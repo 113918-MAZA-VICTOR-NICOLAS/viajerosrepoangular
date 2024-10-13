@@ -1,1 +1,180 @@
-<p>mis-viajes works!</p>
+<div class="container d-flex align-items-center justify-content-center min-vh-100">
+    <div class="align-items-center rounded-3 shadow-lg p-4 m-4 text-center bg-white w-100">
+
+        <label class="py-2"><a [routerLink]="'/profile'">Volver</a></label>
+        <!-- Botones para alternar entre los listados -->
+        <div class="d-flex justify-content-center mb-4 mx-5">
+            <button class="btn btn-black btn-lg poppins-bold mx-2" (click)="showPending()">Pendientes</button>
+            <button class="btn btn-black btn-lg poppins-bold mx-2" (click)="showFinished()">Finalizados</button>
+        </div>
+
+        <!-- Título y listado de viajes pendientes -->
+        <div *ngIf="viewPending">
+            <h1 class="p-1" style="font-size: 2.4rem; font-weight: bold;">Próximos viajes</h1>
+            <label class="dmsans">Viajes pendientes de realizar</label><br>
+
+            <div class="row mt-4 d-flex justify-content-center">
+                <!-- Listado de Cards de Viajes Pendientes -->
+
+                @for (trip of createdTrips; track $index) {
+                <div class="card shadow-sm mb-4 bg-light border-0 rounded-3 mx-2"
+                    style="width: 20rem; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.03)'"
+                    onmouseout="this.style.transform='scale(1)'">
+
+
+                    <button class="position-absolute top-0 end-0 m-2 d-flex justify-content-center align-items-center"
+                        style="background-color: transparent; border: none; width: 2.5rem; height: 2.5rem; border-radius: 50%;"
+                        (click)="deleteTrip(trip)">
+                        <i class="bi bi-x-circle-fill" style="font-size: 2rem; color: #dc3545;"></i>
+                        <!-- Icono de "X" en círculo -->
+                    </button>
+
+
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <label for="origenInput" class="d-block mb-2" style="font-weight: bold;">Origen</label>
+                            <input id="origenInput" type="button" value="{{trip.origin}}" class="form-control btn-form"
+                                readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="destinoInput" class="d-block mb-2" style="font-weight: bold;">Destino</label>
+                            <input id="destinoInput" type="button" value="{{trip.destination}}"
+                                class="form-control btn-form" readonly>
+                        </div>
+                        <p class="card-text mb-1"><strong>Chofer:</strong> {{trip.driverName}}</p>
+                        <p class="card-text mb-1"><strong>Lugares libres:</strong> <span
+                                style="color: red;">{{trip.availableSeats}}</span></p>
+                        <p class="card-text mb-1"><strong>Fecha:</strong> {{ trip.departureTime | date: 'EEEE d MMMM y'
+                            }}</p>
+                        <p class="card-text mb-3"><strong>Vehiculo:</strong> {{trip.vehicleName}}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex">
+                                <ng-container *ngFor="let star of [].constructor(trip.driverRating); let i = index">
+                                    <img src="../../assets/star_yellow.png" alt="star"
+                                        style="width: 20px; height: 20px;">
+                                </ng-container>
+                                <ng-container *ngFor="let star of [].constructor(5 - trip.driverRating); let i = index">
+                                    <img src="../../assets/star_gray.png" alt="star" style="width: 20px; height: 20px;">
+                                </ng-container>
+                            </div>
+                            <button class="btn btn-outline-dark btn-sm" (click)="openTripDetails(trip)">Ver más</button>
+                        </div>
+                    </div>
+                </div>
+                }
+
+            </div>
+        </div>
+
+        <!-- Título y listado de viajes finalizados -->
+        <div *ngIf="viewFinished">
+            <h1 class="p-1" style="font-size: 2.4rem; font-weight: bold;">Viajes finalizados</h1>
+            <label class="dmsans">Aquí puedes encontrar los viajes que te subiste y realizaste</label><br>
+
+            <div class="row mt-4 d-flex justify-content-center">
+                <!-- Listado de Cards de Viajes Finalizados -->
+                <div *ngFor="let trip of finishedTrips; " class="card shadow-sm mb-4 bg-light border-0 rounded-3 mx-2"
+                    style="width: 20rem; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.03)'"
+                    onmouseout="this.style.transform='scale(1)'">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <label for="origenInput" class="d-block mb-2" style="font-weight: bold;">Origen</label>
+                            <input id="origenInput" type="button" value="{{trip.origin}}" class="form-control btn-form"
+                                readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="destinoInput" class="d-block mb-2" style="font-weight: bold;">Destino</label>
+                            <input id="destinoInput" type="button" value="{{trip.destination}}"
+                                class="form-control btn-form" readonly>
+                        </div>
+                        <p class="card-text mb-1"><strong>Chofer:</strong> {{trip.driverName}}</p>
+                        <p class="card-text mb-1"><strong>Lugares libres:</strong> <span
+                                style="color: red;">{{trip.availableSeats}}</span></p>
+                        <p class="card-text mb-1"><strong>Fecha:</strong> {{ trip.departureTime | date: 'EEEE d MMMM y'
+                            }}</p>
+                        <p class="card-text mb-3"><strong>Vehiculo:</strong> {{trip.vehicleName}}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex">
+                                <ng-container *ngFor="let star of [].constructor(trip.driverRating); let i = index">
+                                    <img src="../../assets/star_yellow.png" alt="star"
+                                        style="width: 20px; height: 20px;">
+                                </ng-container>
+                                <ng-container *ngFor="let star of [].constructor(5 - trip.driverRating); let i = index">
+                                    <img src="../../assets/star_gray.png" alt="star" style="width: 20px; height: 20px;">
+                                </ng-container>
+                            </div>
+                            <button class="btn btn-outline-primary btn-sm" (click)="openTripDetails(trip)">Ver
+                                más</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal de detalles de viaje se queda igual -->
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="tripDetailsModal" tabindex="-1" aria-labelledby="tripDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-light shadow-lg rounded-3">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tripDetailsModalLabel">Detalles del Viaje</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center" *ngIf="selectedTrip">
+                <hr class="mb-3" style="height: 1px; border: none; background-color: #ccc;">
+
+                <!-- Origen, Flecha y Destino -->
+                <div class="d-flex justify-content-center align-items-center mb-3">
+                    <div class="d-flex flex-column align-items-center" style="width: 40%;">
+                        <label for="">ORIGEN</label>
+                        <div class="form-control bg-white text-center border-0 shadow-sm mb-0"
+                            style="font-weight: bold;">{{selectedTrip.origin}}</div>
+                    </div>
+                    <img src="../../assets/flecha_red.png" alt="flecha" class="mx-2" style="width: 30px; height: 30px;">
+                    <div class="d-flex flex-column align-items-center" style="width: 40%;">
+                        <label for="">DESTINO</label>
+                        <div class="form-control bg-white text-center border-0 shadow-sm mb-0"
+                            style="font-weight: bold;">{{selectedTrip.destination}}</div>
+                    </div>
+                </div>
+
+                <!-- Fecha centrada -->
+                <div class="d-flex justify-content-center align-items-center mb-3">
+                    <div class="form-control bg-dark text-white text-center border-0 shadow-sm mb-3"
+                        style="width: 80%; font-weight: bold;">
+                        {{ selectedTrip.departureTime | date: 'EEEE d MMMM y' }}
+                    </div>
+                </div>
+                <hr class="mb-3 mt-3" style="height: 1px; border: none; background-color: #ccc;">
+
+                <!-- Otros datos -->
+                <div class="text-start ms-3">
+                    <p class="mb-1"><strong>Horario de salida:</strong> {{ selectedTrip.departureTime | date: 'HH:mm' }}
+                    </p>
+                    <p class="mb-1"><strong>Tiempo aproximado:</strong> {{ travelTime }}</p>
+                    <p class="mb-1"><strong>Distancia:</strong> {{ travelDistance }}</p>
+                    <p class="mb-1"><strong>Mascotas:</strong> {{ selectedTrip.petsAllowed ? 'Sí' : 'No' }}</p>
+                    <p class="mb-1"><strong>Fumadores:</strong> {{ selectedTrip.smokersAllowed ? 'Sí' : 'No' }}</p>
+                    <p class="mb-1"><strong>Vehículo:</strong> {{ selectedTrip.vehicleName }}</p>
+                    <p class="mb-1 text-center"><strong>Lugares disponibles: </strong> <span
+                            style="font-size: 1.5rem; color: red;">{{selectedTrip.availableSeats}}</span></p>
+                </div>
+
+                <!-- Mapa de Google Maps -->
+                <div class="mb-3 mt-4">
+                    <app-google-maps [origin]="{ lat: originLat, lng: originLng }"
+                        [destination]="{ lat: destinationLat, lng: destinationLng }"></app-google-maps>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary btn-lg w-100">Editar</button>
+            </div>
+        </div>
+    </div>
+</div>
