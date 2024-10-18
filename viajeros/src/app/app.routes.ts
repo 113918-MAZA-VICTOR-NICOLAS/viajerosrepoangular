@@ -23,6 +23,7 @@ import { ViajesBuscadosComponent } from './viajes-buscados/viajes-buscados.compo
 import { MisViajesComponent } from './mis-viajes/mis-viajes.component';
 import { ChatComponent } from './chat/chat.component';
 import { SubirmeComponent } from './subirme/subirme.component';
+import { PaymentConfirmationComponent } from './payment-confirmation/payment-confirmation.component';
 
 export const routes: Routes = [{
     path: 'home',
@@ -110,6 +111,11 @@ export const routes: Routes = [{
 {
     path: 'viajes-buscados',
     component: ViajesBuscadosComponent,
+    canActivate: [authGuard],
+},
+{
+    path: 'payment-confirmation',
+    component: PaymentConfirmationComponent,
     canActivate: [authGuard],
 },
 {

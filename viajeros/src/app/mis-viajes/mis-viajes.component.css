@@ -6,7 +6,15 @@
     text-align: start; 
 }
 
-
+.btn-red {
+  background-color: #9e0303; /* Fondo negro */
+  color: #fff; /* Texto blanco */
+  border-radius: 50px; /* Hace el botón redondeado */
+  width: 100%; 
+  border: none; /* Sin borde */
+  transition: background-color 0.3s; /* Transición suave en hover */
+  font-weight: bold;
+}
 .btn-black {
     background-color: #000; /* Fondo negro */
     color: #fff; /* Texto blanco */

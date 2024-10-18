@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { ViajesRequestMatchDto } from '../models/Viajes/ViajesRequestMatchDto';
 import { SearchResultMatchDto } from '../models/Viajes/SearchResultMatchDto';
 import { IsChoferDto } from '../models/Chat/IsChoferDto';
+import { PassengersDto } from '../models/Viajes/PassengersDto';
 
 @Injectable({
   providedIn: 'root'
@@ -101,10 +102,30 @@ export class ViajeService {
     const headers = this.getAuthHeaders();
     return this.http.get<IsChoferDto>(`${this.apiUrl}/isChofer/${tripId}/${userId}`, { headers });
   }
-  
-   // Método para obtener el viaje por su ID
-   getTripById(tripId: number): Observable<SearchResultMatchDto> {
+
+  // Método para obtener el viaje por su ID
+  getTripById(tripId: number): Observable<SearchResultMatchDto> {
     const headers = this.getAuthHeaders();
     return this.http.get<SearchResultMatchDto>(`${this.apiUrl}/trip/${tripId}`, { headers });
   }
+
+  // Método para obtener los pasajeros de un viaje específico por su ID
+  getPassengersByTripId(tripId: number): Observable<PassengersDto[]> {
+    const headers = this.getAuthHeaders();
+    return this.http.get<PassengersDto[]>(`${this.apiUrl}/passengers/${tripId}`, { headers });
+  }
+  // Método para eliminar un pasajero de un viaje y solicitar reintegro
+  deletePassengerFromTrip(tripId: number, userId: number): Observable<any> {
+    const url = `${this.apiUrl}/${tripId}/remove-passenger/${userId}`;
+
+    const headers = this.getAuthHeaders();
+
+    return this.http.post(url, {}, { headers, responseType: 'text' as 'json' });
+  }
+  finalizarViaje(tripId: number): Observable<any> {
+    const headers = this.getAuthHeaders();
+  
+    return this.http.post(`${this.apiUrl}/${tripId}/finalizar`, {}, { headers, responseType: 'text' as 'json'  });
+  }
+  
 }

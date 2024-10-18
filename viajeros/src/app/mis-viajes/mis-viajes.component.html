@@ -22,7 +22,8 @@
                     onmouseout="this.style.transform='scale(1)'">
 
 
-                    <button class="position-absolute top-0 end-0 m-2 d-flex justify-content-center align-items-center"
+                    <button *ngIf="selectedTrip?.status == 'CREATED'"
+                        class="position-absolute top-0 end-0 m-2 d-flex justify-content-center align-items-center"
                         style="background-color: transparent; border: none; width: 2.5rem; height: 2.5rem; border-radius: 50%;"
                         (click)="deleteTrip(trip)">
                         <i class="bi bi-x-circle-fill" style="font-size: 2rem; color: #dc3545;"></i>
@@ -42,11 +43,21 @@
                                 class="form-control btn-form" readonly>
                         </div>
                         <p class="card-text mb-1"><strong>Chofer:</strong> {{trip.driverName}}</p>
-                        <p class="card-text mb-1"><strong>Lugares libres:</strong> <span
+                        <p class="card-text mb-1"><strong>Lugares libres: </strong> <span
                                 style="color: red;">{{trip.availableSeats}}</span></p>
                         <p class="card-text mb-1"><strong>Fecha:</strong> {{ trip.departureTime | date: 'EEEE d MMMM y'
                             }}</p>
                         <p class="card-text mb-3"><strong>Vehiculo:</strong> {{trip.vehicleName}}</p>
+
+                        <!-- Botón con estilo conservado -->
+                        <button class="btn btn-black btn-lg poppins-bold mx-2 mb-3">
+                            {{ translateStatus(trip.status) }}
+                        </button>
+                        <button *ngIf="trip.driverId == userId && trip.status == 'IN PROGRESS' "
+                            class="btn btn-green btn-lg poppins-bold mx-2 mb-3" (click)="finalizarViaje(trip)">
+                            Finalizar Viaje
+                        </button>
+
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="d-flex">
                                 <ng-container *ngFor="let star of [].constructor(trip.driverRating); let i = index">
@@ -57,7 +68,8 @@
                                     <img src="../../assets/star_gray.png" alt="star" style="width: 20px; height: 20px;">
                                 </ng-container>
                             </div>
-                            <button class="btn btn-outline-dark btn-sm" (click)="openTripDetails(trip)">Ver más</button>
+                            <button class="btn btn-outline-dark btn-sm" (click)="getPassengers(trip.tripId)"
+                                (click)="openTripDetails(trip)">Ver más</button>
                         </div>
                     </div>
                 </div>
@@ -93,6 +105,10 @@
                         <p class="card-text mb-1"><strong>Fecha:</strong> {{ trip.departureTime | date: 'EEEE d MMMM y'
                             }}</p>
                         <p class="card-text mb-3"><strong>Vehiculo:</strong> {{trip.vehicleName}}</p>
+                        <button *ngIf="trip.status == 'FINISHED' "
+                        class="btn btn-red btn-lg poppins-bold mx-2 mb-3">
+                        VIAJE FINALIZADO
+                    </button>
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="d-flex">
                                 <ng-container *ngFor="let star of [].constructor(trip.driverRating); let i = index">
@@ -114,7 +130,19 @@
     </div>
 </div>
 
-<!-- Modal de detalles de viaje se queda igual -->
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -162,6 +190,16 @@
                     <p class="mb-1"><strong>Mascotas:</strong> {{ selectedTrip.petsAllowed ? 'Sí' : 'No' }}</p>
                     <p class="mb-1"><strong>Fumadores:</strong> {{ selectedTrip.smokersAllowed ? 'Sí' : 'No' }}</p>
                     <p class="mb-1"><strong>Vehículo:</strong> {{ selectedTrip.vehicleName }}</p>
+                    <p *ngIf="passengers.length > 0" class="mb-1 text-center mt-3"><strong>Pasajeros: </strong></p>
+                    <div class="d-flex justify-content-center align-items-center mb-0">
+                        @for (item of passengers; track $index) {
+                        <div class="form-control bg-dark text-white text-center border-0 shadow-sm mb-0"
+                            style="width: 80%; font-weight: bold;">
+                            {{ item.nombre }}
+                        </div>
+                        }
+
+                    </div>
                     <p class="mb-1 text-center"><strong>Lugares disponibles: </strong> <span
                             style="font-size: 1.5rem; color: red;">{{selectedTrip.availableSeats}}</span></p>
                 </div>
@@ -173,7 +211,11 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary btn-lg w-100">Editar</button>
+                <button *ngIf="isChofer" type="button" class="btn btn-primary btn-lg w-100">Editar</button>
+                <button *ngIf="!isChofer" type="button" class="btn btn-danger btn-lg w-100">Sos el pasajero</button>
+                <button *ngIf="!isChofer && selectedTrip?.status == 'CREATED'" type="button"
+                    class="btn btn-danger btn-lg w-100" (click)="deleteTripInModal()">Solicitar reintegro y
+                    anular</button>
             </div>
         </div>
     </div>

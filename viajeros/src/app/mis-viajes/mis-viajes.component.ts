@@ -7,6 +7,7 @@ import { ViajeService } from '../services/viaje.service';
 import * as bootstrap from 'bootstrap'; // Importa Bootstrap JS
 import { GeocodingService } from '../services/geocoding.service';
 import Swal from 'sweetalert2';
+import { PassengersDto } from '../models/Viajes/PassengersDto';
 @Component({
   selector: 'app-mis-viajes',
   standalone: true,
@@ -29,13 +30,63 @@ export class MisViajesComponent implements OnInit {
 
   travelDistance: string = '';
   travelTime: string = '';
-
+  isChofer: boolean = false;
+  isChoferCard: boolean = false;
+  passengers: PassengersDto[] = [];
+  userId:number = 0;
   constructor(private cdr: ChangeDetectorRef, private viajesService: ViajeService, private geocodingService: GeocodingService) { }
 
   ngOnInit(): void {
-
+    const id = localStorage.getItem('userId');
+    if(id){
+      this.userId = parseInt(id,10);
+    }
     this.loadTrips();
+
   }
+  getPassengers(tripid:number): void {
+    this.viajesService.getPassengersByTripId(tripid).subscribe(
+      (data: PassengersDto[]) => {
+        this.passengers = data;
+      },
+      (error) => {
+        console.error('Error al obtener los pasajeros:', error);
+      }
+    );
+  }
+  finalizarViaje(trip: SearchResultMatchDto) {
+    this.viajesService.finalizarViaje(trip.tripId).subscribe({
+      next: (response) => {
+        Swal.fire('¡Viaje finalizado!', 'El viaje ha sido finalizado correctamente.', 'success');
+        this.loadTrips();  // Recargar los viajes actualizados
+      },
+      error: (error) => {
+        console.error('Error al finalizar el viaje:', error);
+        Swal.fire('Error', 'No se pudo finalizar el viaje. Intenta de nuevo más tarde.', 'error');
+      }
+    });
+  }
+  
+
+  soychofer(tripid: number) {
+    const userid = localStorage.getItem('userId');
+
+    if (userid) { // Verificar si userid no es null
+      this.viajesService.soyChoferDelViaje(tripid, parseInt(userid, 10)).subscribe(
+        (response) => {
+          console.log(response)
+          this.isChofer = response.ischofer;
+          this.cdr.detectChanges(); // Forzar la detección de cambios si es necesario
+        },
+        (error) => {
+          console.error('Error al verificar si es chofer:', error);
+        }
+      );
+    } else {
+      console.error('No se encontró userId en el localStorage');
+    }
+  }
+
 
   // Función para convertir la fecha en un objeto Date
   private convertToDate(dateArray: any): Date {
@@ -52,7 +103,8 @@ export class MisViajesComponent implements OnInit {
   }
   openTripDetails(trip: SearchResultMatchDto) {
     this.selectedTrip = trip;
-
+    this.soychofer(this.selectedTrip.tripId)
+    console.log(this.isChofer)
     // Obtener latitud y longitud del origen
     this.geocodingService.getLatLong(trip.origin).subscribe({
       next: (response) => {
@@ -89,41 +141,157 @@ export class MisViajesComponent implements OnInit {
     }
   }
 
-  
-deleteTrip(tripId: SearchResultMatchDto): void {
-  Swal.fire({
-    title: '¿Estás seguro?',
-    text: "No podrás revertir esta acción!",
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#d33',
-    confirmButtonText: 'Sí, eliminar!',
-    cancelButtonText: 'Cancelar'
-  }).then((result) => {
-    if (result.isConfirmed) {
-      this.viajesService.deleteTrip(tripId.tripId).subscribe({
-        next: (response) => {
-          Swal.fire(
-            'Eliminado!',
-            'El viaje ha sido eliminado.',
-            'success'
-          );
-          this.loadTrips();
-          this.cdr.detectChanges();  // Forzar la detección de cambios
-        },
-        error: (err) => {
-          console.error('Error al eliminar el viaje:', err);
-          Swal.fire(
-            'Error!',
-            'No se pudo eliminar el viaje. Inténtalo de nuevo más tarde.',
-            'error'
-          );
-        }
-      });
+  deleteTripInModal(){
+    if(this.selectedTrip){
+      this.deleteTrip(this.selectedTrip)
     }
-  });
-}
+  
+   
+  }
+  deleteTrip(tripId: SearchResultMatchDto): void {
+    const userId = localStorage.getItem('userId');
+    
+    // Verifica si el usuario es chofer
+    this.viajesService.soyChoferDelViaje(tripId.tripId, parseInt(userId ?? '0', 10)).subscribe(
+      (response) => {
+        if (response.ischofer) {
+          // Si el usuario es chofer, seguir la lógica actual
+          this.handleDeleteAsChofer(tripId);
+        } else {
+          // Si es pasajero, eliminarlo como pasajero y solicitar reintegro
+          this.handleDeleteAsPassenger(tripId, parseInt(userId ?? '0', 10));
+        }
+      },
+      (error) => {
+        console.error('Error al verificar si es chofer:', error);
+      }
+    );
+  }
+  private handleDeleteAsChofer(tripId: SearchResultMatchDto): void {
+    this.viajesService.getPassengersByTripId(tripId.tripId).subscribe(
+      (data: PassengersDto[]) => {
+        this.passengers = data;
+  
+        if (this.passengers.length > 0) {
+          // Mostrar advertencia de reintegros
+          Swal.fire({
+            title: 'Advertencia!',
+            text: "Este viaje tiene pasajeros. Si eliminas el viaje, se realizarán reintegros a todos los pasajeros.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, eliminar y reembolsar',
+            cancelButtonText: 'Cancelar'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              // Si el usuario confirma, eliminar el viaje completo
+              this.executeDeleteTrip(tripId);
+            } else {
+              this.passengers = [];
+            }
+          });
+        } else {
+          // Si no hay pasajeros, eliminar el viaje directamente
+          Swal.fire({
+            title: '¿Estás seguro?',
+            text: "No podrás revertir esta acción!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, eliminar!',
+            cancelButtonText: 'Cancelar'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              this.executeDeleteTrip(tripId);
+            }
+          });
+        }
+      },
+      (error) => {
+        console.error('Error al obtener los pasajeros:', error);
+        Swal.fire(
+          'Error',
+          'No se pudo verificar los pasajeros del viaje. Inténtalo de nuevo más tarde.',
+          'error'
+        );
+      }
+    );
+  }
+  private handleDeleteAsPassenger(tripId: SearchResultMatchDto, userId: number): void {
+    Swal.fire({
+      title: '¿Solicitar reintegro?',
+      text: "Estás a punto de solicitar un reintegro y eliminar tu participación en este viaje.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, solicitar reintegro',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Solicitar el reintegro y eliminar al pasajero del viaje
+        this.viajesService.deletePassengerFromTrip(tripId.tripId, userId).subscribe({
+          next: (response) => {
+            Swal.fire(
+              'Eliminado!',
+              'Tu participación en el viaje ha sido eliminada y se ha solicitado el reintegro.',
+              'success'
+            );
+            this.loadTrips();
+            this.cdr.detectChanges(); // Forzar la detección de cambios
+          },
+          error: (err) => {
+            console.error('Error al eliminar al pasajero y solicitar reintegro:', err);
+            Swal.fire(
+              'Error!',
+              'No se pudo procesar tu solicitud. Inténtalo de nuevo más tarde.',
+              'error'
+            );
+          }
+        });
+      }
+    });
+  }
+  
+
+   // Método para traducir los estados del viaje
+   translateStatus(status: string): string {
+    switch (status) {
+      case 'CREATED':
+        return 'PENDIENTE';
+      case 'IN PROGRESS':
+        return 'EN PROGRESO';
+      case 'FINISHED':
+        return 'FINALIZADO';
+      default:
+        return status; // Devuelve el estado original si no coincide con ninguno de los casos
+    }
+  }
+  
+  // Método para eliminar el viaje
+  private executeDeleteTrip(tripId: SearchResultMatchDto): void {
+    this.viajesService.deleteTrip(tripId.tripId).subscribe({
+      next: (response) => {
+        Swal.fire(
+          'Eliminado!',
+          'El viaje ha sido eliminado.',
+          'success'
+        );
+        this.loadTrips();
+        this.cdr.detectChanges();  // Forzar la detección de cambios
+      },
+      error: (err) => {
+        console.error('Error al eliminar el viaje:', err);
+        Swal.fire(
+          'Error!',
+          'No se pudo eliminar el viaje. Inténtalo de nuevo más tarde.',
+          'error'
+        );
+      }
+    });
+  }
   loadTrips() {
     this.viajesService.getAllCreatedAndInProgressByUser().subscribe({
       next: (trips) => {

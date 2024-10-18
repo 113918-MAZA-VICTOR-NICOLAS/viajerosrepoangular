@@ -4,6 +4,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ViajeService } from '../services/viaje.service';
 import { SearchResultMatchDto } from '../models/Viajes/SearchResultMatchDto';
 import { Chat } from '../models/Chat/Chat';
+import { MercadopagoService } from '../services/mercadopago.service';
+import { PreferenceTripDto } from '../models/Payments/PreferenceTripDto';
 
 @Component({
   selector: 'app-subirme',
@@ -18,7 +20,7 @@ export class SubirmeComponent implements OnInit {
   tripIdConvertedNumber: number = 0; // Variable para almacenar el tripId convertido a número
   viajeSelected!: SearchResultMatchDto;
 
-  constructor(private route: ActivatedRoute, private viajeservice: ViajeService, private router:Router) { }
+  constructor(private route: ActivatedRoute, private viajeservice: ViajeService, private router:Router, private mercadopagoservice: MercadopagoService) { }
 
   ngOnInit(): void {
     // Capturar el tripId desde los parámetros de la ruta
@@ -60,6 +62,28 @@ export class SubirmeComponent implements OnInit {
   }
 
   onSubirmeClick() {
-    // Lógica para el botón "Subirme"
+    // Crear directamente el objeto PreferenceTripDto con los valores necesarios
+  
+    const preferenceTripDto = new PreferenceTripDto(
+      this.tripIdConvertedNumber, // idviaje
+      10, // monto
+      'Viajeros.com', // title
+      this.viajeSelected.origin + ' ' + this.viajeSelected.destination, // description
+      Number(localStorage.getItem('userId')) // idpasajero obtenido del localStorage
+    );
+  console.log(preferenceTripDto)
+    // Enviar la preferencia al servicio de MercadoPago
+    this.mercadopagoservice.crearPreferencia(preferenceTripDto).subscribe(
+      (response) => {
+        console.log('Preferencia creada:', response);
+        this.mercadopagoservice.initMercadoPagoButton(response.id); 
+      },
+      (error) => {
+        console.error('Error al crear la preferencia:', error);
+      }
+    );
   }
+  
+
+  
 }

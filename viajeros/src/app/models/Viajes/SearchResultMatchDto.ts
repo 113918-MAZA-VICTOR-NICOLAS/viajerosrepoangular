@@ -11,6 +11,8 @@ export interface SearchResultMatchDto {
     smokersAllowed: boolean;
     vehicleName: string;
     driverRating: number; // Suponiendo que sea un valor numérico
+    driverId: number;
     driverName: string;
+    status:string;
   }
   
