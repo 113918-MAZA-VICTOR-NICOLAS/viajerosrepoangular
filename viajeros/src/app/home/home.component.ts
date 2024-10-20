@@ -20,25 +20,32 @@ export class HomeComponent {
     pass: ''
   }
 
-   // Inyectar el servicio de login y el router
-   constructor(private loginService: LoginService, private router: Router) { }
+  // Inyectar el servicio de login y el router
+  constructor(private loginService: LoginService, private router: Router) { }
 
-   onSubmit() {
+  onSubmit() {
     this.loginService.login(this.login.username, this.login.pass).subscribe(
       response => {
         const token = response.token; // Extrae el token
         const userId = response.id;    // Extrae el ID del usuario
         const userName = response.name; // Extrae el nombre del usuario
-  
+        const userRol = response.role;
+
         // Guarda el token, el ID y el nombre en local storage
-        this.loginService.saveSessionData(token, userId, userName);
+        this.loginService.saveSessionData(token, userId, userName, userRol);
         this.loginService.saveToken(token); // Guarda el token en local storage
-        this.router.navigate(['/principal']); // Redirige a otra ruta, por ejemplo: /principal
+
+        if (userRol == 'USER') {
+          this.router.navigate(['/principal']); // Redirige a otra ruta, por ejemplo: /principal
+
+        } else {
+          this.router.navigate(['/admin/stadistics'])
+        }
       },
       error => {
         const errorResponse: LoginResponseDto = error.error;
         console.error('Error en el login:', errorResponse);
-        
+
         if (errorResponse.userFalse) {
           Swal.fire({
             icon: "error",
@@ -47,7 +54,7 @@ export class HomeComponent {
             footer: '<a href="/register" id="register-link">Registrarme</a>'
           });
 
-        
+
         } else if (errorResponse.passwordFalse) {
           Swal.fire({
             icon: "error",
@@ -66,5 +73,5 @@ export class HomeComponent {
       }
     );
   }
-  
-  }
+
+}

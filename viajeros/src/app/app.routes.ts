@@ -5,7 +5,7 @@ import { NotificationsComponent } from './notifications/notifications.component'
 import { RegisterComponent } from './register/register.component';
 import { ListMessagesComponent } from './list-messages/list-messages.component';
 import { ProfileComponent } from './profile/profile.component';
-import { authGuard } from './services/auth.guard';
+import { adminGuard, authGuard } from './services/auth.guard';
 import { noAuthGuard } from './services/no-auth.guard';
 import { PasswordrecoveryComponent } from './passwordrecovery/passwordrecovery.component';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
@@ -24,6 +24,11 @@ import { MisViajesComponent } from './mis-viajes/mis-viajes.component';
 import { ChatComponent } from './chat/chat.component';
 import { SubirmeComponent } from './subirme/subirme.component';
 import { PaymentConfirmationComponent } from './payment-confirmation/payment-confirmation.component';
+import { ManageUsersComponent } from './ADMIN/manage-users/manage-users.component';
+import { ViajesComponent } from './ADMIN/viajes/viajes.component';
+import { ReintegrosComponent } from './ADMIN/reintegros/reintegros.component';
+import { SenasComponent } from './ADMIN/senas/senas.component';
+import { StadisticsComponent } from './ADMIN/stadistics/stadistics.component';
 
 export const routes: Routes = [{
     path: 'home',
@@ -131,6 +136,31 @@ export const routes: Routes = [{
 {
     path: 'chat/:tripId',
     component: ChatComponent
+},
+{
+    path: 'admin/manage-users',
+    component: ManageUsersComponent,
+    canActivate: [adminGuard],
+},
+{
+    path: 'admin/viajes',
+    component: ViajesComponent,
+    canActivate: [adminGuard],
+},
+{
+    path: 'admin/reintegros',
+    component: ReintegrosComponent,
+    canActivate: [adminGuard],
+},
+{
+    path: 'admin/senas',
+    component: SenasComponent,
+    canActivate: [adminGuard],
+},
+{
+    path: 'admin/stadistics',
+    component: StadisticsComponent,
+    canActivate: [adminGuard],
 },
 {
     path: '',

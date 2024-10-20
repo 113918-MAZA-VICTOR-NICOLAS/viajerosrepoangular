@@ -26,6 +26,10 @@ export class LoginService {
     return localStorage.getItem('token');
   }
 
+  getRol(): string | null {
+    return localStorage.getItem('rol');
+  }
+
   // Obtener el id del usuario desde el local storage
   getUserId(): string | null {
     return localStorage.getItem('userId');
@@ -40,13 +44,15 @@ export class LoginService {
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
     localStorage.removeItem('userName');
+    localStorage.removeItem('rol');
   }
 
 
   // Guardar el token, id y nombre en el local storage
-  saveSessionData(token: string, id: string, name: string): void {
+  saveSessionData(token: string, id: string, name: string, rol: string): void {
     localStorage.setItem('token', token);
     localStorage.setItem('userId', id);
     localStorage.setItem('userName', name);
+    localStorage.setItem('rol', rol);
   }
 }
