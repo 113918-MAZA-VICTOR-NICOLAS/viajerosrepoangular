@@ -7,6 +7,7 @@ import { UpdateUserRequestDto } from '../models/UpdateUserRequestDto';
 import Swal from 'sweetalert2';
 import { UserDataDto } from '../models/User/UserDataDto';
 import { UserSummaryDto } from '../models/User/UserSummaryDto';
+import { ResponsePaymentDto } from '../models/Payments/ResponsePaymentDto';
 
 @Injectable({
   providedIn: 'root'
@@ -31,6 +32,8 @@ export class UserService {
 
 
   registerNewUser(newuserdata: NewUserDto): Observable<any> {
+
+    
     return this.http.post(this.apiUrl + '/register', newuserdata);
   }
 

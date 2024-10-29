@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -9,8 +9,21 @@ export class LoginService {
 
   private apiUrl = 'http://localhost:8080/api/auth/login'; // Cambia por la URL de tu backend
 
-  constructor(private http: HttpClient) { }
+  private userRoleSubject = new BehaviorSubject<string | null>(null); // BehaviorSubject para el rol del usuario
 
+  constructor(private http: HttpClient) {
+    const storedRole = localStorage.getItem('rol');
+    if (storedRole) {
+      this.userRoleSubject.next(storedRole); // Inicializa el BehaviorSubject si hay rol en el localStorage
+    }
+  }
+
+  // Obtener el rol del usuario como Observable
+  getUserRole(): Observable<string | null> {
+    return this.userRoleSubject.asObservable(); // Devuelve el BehaviorSubject como Observable
+  }
+
+  
   // Método para iniciar sesión
   login(username: string, password: string): Observable<any> {
     return this.http.post<any>(this.apiUrl, { username, password });
@@ -45,6 +58,7 @@ export class LoginService {
     localStorage.removeItem('userId');
     localStorage.removeItem('userName');
     localStorage.removeItem('rol');
+    
   }
 
 
@@ -54,5 +68,7 @@ export class LoginService {
     localStorage.setItem('userId', id);
     localStorage.setItem('userName', name);
     localStorage.setItem('rol', rol);
+
+    this.userRoleSubject.next(rol); // Actualizar el BehaviorSubject con el rol
   }
 }

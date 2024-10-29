@@ -16,7 +16,15 @@
     transition: background-color 0.3s; /* Transición suave en hover */
     font-weight: bold;
 }
-
+.btn-red {
+  background-color: #e40a0a; /* Fondo negro */
+  color: #fff; /* Texto blanco */
+  border-radius: 50px; /* Hace el botón redondeado */
+  width: 100%; 
+  border: none; /* Sin borde */
+  transition: background-color 0.3s; /* Transición suave en hover */
+  font-weight: bold;
+}
 .btn-green {
     background-color: #1c840a; /* Fondo negro */
     color: #fff; /* Texto blanco */

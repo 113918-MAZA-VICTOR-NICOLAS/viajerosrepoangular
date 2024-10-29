@@ -1,12 +1,14 @@
 import { Component } from '@angular/core';
 import { PhoneNavbarComponent } from "../phone-navbar/phone-navbar.component";
 import { LoginService } from '../services/login.service';
-import { Route, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Route, Router, RouterLink } from '@angular/router';
 import { UserService } from '../services/user.service';
 import { UserDataDto } from '../models/User/UserDataDto';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { UserSummaryDto } from '../models/User/UserSummaryDto';
+import { ResponsePaymentDto } from '../models/Payments/ResponsePaymentDto';
+import { PaymentsService } from '../services/payments.service';
 
 @Component({
   selector: 'app-profile',
@@ -17,14 +19,13 @@ import { UserSummaryDto } from '../models/User/UserSummaryDto';
 })
 export class ProfileComponent {
 
-  user = {
-    name: 'Juan Lopez',
-    history: 'Me gusta viajar con compania',
-  }
   userSummary: UserSummaryDto | undefined;
   userdata!: UserDataDto;
+  payment: ResponsePaymentDto | null = null;
+  error: string | null = null;
 
-  constructor(private loginservice: LoginService, private routes: Router, private userservice: UserService) { }
+  constructor(private loginservice: LoginService, private routes: Router, private userservice: UserService, private paymentService: PaymentsService,
+    private route: ActivatedRoute) { }
 
   ngOnInit(): void {
     //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
@@ -38,11 +39,19 @@ export class ProfileComponent {
     );
 
     this.userservice.getUserSummary().subscribe({
-      next: (data) => this.userSummary = data,
+      next: (data) => {
+        this.userSummary = data;
+        this.userSummary.averageRating = this.userSummary.averageRating ?? 0;  // Asegura un valor por defecto
+      },
       error: (err) => console.error('Error loading user summary', err)
     });
-  }
 
+
+    
+  }
+  round(value: number): number {
+    return Math.round(value);
+  }
   logout() {
 
     Swal.fire({
@@ -56,7 +65,7 @@ export class ProfileComponent {
       if (result.isConfirmed) {
         this.loginservice.logout();
         this.routes.navigate(['/home']);
-      
+
       }
     });
 

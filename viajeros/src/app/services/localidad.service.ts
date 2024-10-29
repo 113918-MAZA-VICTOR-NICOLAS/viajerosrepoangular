@@ -27,4 +27,13 @@ export class LocalidadService {
     return this.http.get<{ id: number, nombre: string }[]>(url, { headers }); // Realizamos la petición HTTP GET
   }
 
+   // Método para obtener una localidad por su ID
+   // Método para obtener una localidad por su ID y devolver el nombre de la localidad
+   getLocalidadById(id: number): Observable<{ localidad: string }> {
+    const headers = this.getHeaders(); // Obtenemos los headers con el token
+    const url = `${this.apiUrl}/id?id=${id}`; // Construimos la URL con el parámetro ID
+    return this.http.get<{ localidad: string }>(url, { headers }); // Realizamos la petición HTTP GET
+  }
+  
+
 }

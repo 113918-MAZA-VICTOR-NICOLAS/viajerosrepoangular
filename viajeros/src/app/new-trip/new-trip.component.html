@@ -1,13 +1,39 @@
 <div class="container d-flex align-items-center justify-content-center min-vh-100">
     <div class="align-items-center rounded-3 shadow-lg p-4 m-4 text-center bg-white">
-        <h1 class="p-1" style="font-size: 2.4rem; font-weight: bold;">Crear Nuevo Viaje</h1>
+        <h1 class="p-1" style="font-size: 2.4rem; font-weight: bold;">
+            {{ tripId ? 'Editar Viaje' : 'Crear Nuevo Viaje' }}
+        </h1>
+
         <label class="dmsans">Comparte los gastos de tu viaje siendo chofer</label><br>
 
         <label class="py-2"><a [routerLink]="'/principal'">Volver</a></label>
 
         <form [formGroup]="createTripForm" (ngSubmit)="submitTripForm()">
             <div class="p-4 pt-1">
-                <!-- Origen -->
+                <!-- Vehículo -->
+                <div *ngIf="vehiculos.length != 0" class="text-start mt-4">
+                    <label for="idVehiculo" class="form-label">ELIGE UN VEHÍCULO</label>
+                    <select formControlName="idVehiculo" class="form-control mb-0" required>
+                        <option *ngFor="let vehiculo of vehiculos" [value]="vehiculo.idCar  | number"
+                            (click)="vehicleSelected(vehiculo)">{{ vehiculo.brand
+                            }} {{
+                            vehiculo.model }}</option>
+                    </select>
+                    <div *ngIf="createTripForm.get('idVehiculo')?.invalid && createTripForm.get('idVehiculo')?.touched"
+                        class="text-danger">
+                        Debes elegir un vehículo.
+                    </div>
+                </div>
+                <div class="text-start mt-4 position-relative">
+                    <div *ngIf="vehiculos.length == 0">
+                        <label class="form-label text-start">NO TIENE VEHICULOS CARGADOS</label>
+                        <button type="button" class="py-2 btn btn-red btn-lg poppins-bold mb-3"
+                            [routerLink]="'../vehicle'">
+                            Cargar vehiculo
+                        </button>
+
+                    </div>
+                </div>
                 <!-- Origen -->
                 <div class="text-start mt-0 position-relative">
                     <label for="origen" class="form-label">ORIGEN</label>
@@ -66,20 +92,7 @@
                         Fecha y hora de salida son requeridas.
                     </div>
                 </div>
-                <!-- Vehículo -->
-                <div class="text-start mt-4">
-                    <label for="idVehiculo" class="form-label">ELIGE UN VEHÍCULO</label>
-                    <select formControlName="idVehiculo" class="form-control mb-0" required>
-                        <option *ngFor="let vehiculo of vehiculos" [value]="vehiculo.idCar  | number"
-                            (click)="vehicleSelected(vehiculo)">{{ vehiculo.brand
-                            }} {{
-                            vehiculo.model }}</option>
-                    </select>
-                    <div *ngIf="createTripForm.get('idVehiculo')?.invalid && createTripForm.get('idVehiculo')?.touched"
-                        class="text-danger">
-                        Debes elegir un vehículo.
-                    </div>
-                </div>
+
                 <!-- Gasto total -->
                 <div class="text-start mt-4">
                     <label for="gastoTotal" class="form-label">PRECIO TOTAL DEL VIAJE (EN $)</label>
@@ -152,9 +165,19 @@
             </div>
 
             <div class="p-4 pt-0">
-                <button type="submit" class="btn btn-black btn-lg poppins-bold"
-                    [disabled]="createTripForm.invalid">Publicar Viaje</button>
+                <!-- Mostrar el botón de "Cargar Cambios" si estamos editando -->
+                <button *ngIf="tripId" type="button" class="btn btn-black btn-lg poppins-bold" (click)="updateTrip()"
+                    [disabled]="createTripForm.invalid">
+                    Cargar Cambios
+                </button>
+
+                <!-- Mostrar el botón de "Publicar Viaje" si no estamos editando -->
+                <button *ngIf="!tripId" type="submit" class="btn btn-black btn-lg poppins-bold"
+                    [disabled]="createTripForm.invalid">
+                    Publicar Viaje
+                </button>
             </div>
+
         </form>
     </div>
 </div>

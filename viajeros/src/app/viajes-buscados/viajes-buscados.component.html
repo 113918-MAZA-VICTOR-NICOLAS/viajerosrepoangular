@@ -38,7 +38,7 @@
             <!-- Estrellas de calificación -->
             <div class="d-flex">
               <!-- Mostrar estrellas amarillas según el rating -->
-              <ng-container *ngFor="let star of [].constructor(trip.driverRating); let i = index">
+              <ng-container *ngFor="let star of [].constructor(round(trip.driverRating)); let i = index">
                 <div class="p-0">
                   <img src="../../assets/star_yellow.png" alt="star" class="rounded-5"
                     style="width: 20px; height: 20px;">
@@ -46,7 +46,7 @@
               </ng-container>
 
               <!-- Mostrar estrellas grises para el resto (hasta 5 estrellas) -->
-              <ng-container *ngFor="let star of [].constructor(5 - trip.driverRating); let i = index">
+              <ng-container *ngFor="let star of [].constructor(5 - round(trip.driverRating)); let i = index">
                 <div class="p-0">
                   <img src="../../assets/star_gray.png" alt="star" class="rounded-5" style="width: 20px; height: 20px;">
                 </div>
@@ -100,7 +100,7 @@
             <!-- Estrellas de calificación -->
             <div class="d-flex">
               <!-- Mostrar estrellas amarillas según el rating -->
-              <ng-container *ngFor="let star of [].constructor(trip.driverRating); let i = index">
+              <ng-container *ngFor="let star of [].constructor(round(trip.driverRating)); let i = index">
                 <div class="p-0">
                   <img src="../../assets/star_yellow.png" alt="star" class="rounded-5"
                     style="width: 20px; height: 20px;">
@@ -108,7 +108,7 @@
               </ng-container>
 
               <!-- Mostrar estrellas grises para el resto (hasta 5 estrellas) -->
-              <ng-container *ngFor="let star of [].constructor(5 - trip.driverRating); let i = index">
+              <ng-container *ngFor="let star of [].constructor(5 - round(trip.driverRating)); let i = index">
                 <div class="p-0">
                   <img src="../../assets/star_gray.png" alt="star" class="rounded-5" style="width: 20px; height: 20px;">
                 </div>
@@ -155,7 +155,7 @@
             <!-- Estrellas de calificación -->
             <div class="d-flex">
               <!-- Mostrar estrellas amarillas según el rating -->
-              <ng-container *ngFor="let star of [].constructor(trip.driverRating); let i = index">
+              <ng-container *ngFor="let star of [].constructor(round(trip.driverRating)); let i = index">
                 <div class="p-0">
                   <img src="../../assets/star_yellow.png" alt="star" class="rounded-5"
                     style="width: 20px; height: 20px;">
@@ -163,7 +163,7 @@
               </ng-container>
 
               <!-- Mostrar estrellas grises para el resto (hasta 5 estrellas) -->
-              <ng-container *ngFor="let star of [].constructor(5 - trip.driverRating); let i = index">
+              <ng-container *ngFor="let star of [].constructor(5 - round(trip.driverRating)); let i = index">
                 <div class="p-0">
                   <img src="../../assets/star_gray.png" alt="star" class="rounded-5" style="width: 20px; height: 20px;">
                 </div>
@@ -216,7 +216,7 @@
             <!-- Estrellas de calificación -->
             <div class="d-flex">
               <!-- Mostrar estrellas amarillas según el rating -->
-              <ng-container *ngFor="let star of [].constructor(trip.driverRating); let i = index">
+              <ng-container *ngFor="let star of [].constructor(round(trip.driverRating)); let i = index">
                 <div class="p-0">
                   <img src="../../assets/star_yellow.png" alt="star" class="rounded-5"
                     style="width: 20px; height: 20px;">
@@ -224,7 +224,7 @@
               </ng-container>
 
               <!-- Mostrar estrellas grises para el resto (hasta 5 estrellas) -->
-              <ng-container *ngFor="let star of [].constructor(5 - trip.driverRating); let i = index">
+              <ng-container *ngFor="let star of [].constructor(5 - round(trip.driverRating)); let i = index">
                 <div class="p-0">
                   <img src="../../assets/star_gray.png" alt="star" class="rounded-5" style="width: 20px; height: 20px;">
                 </div>

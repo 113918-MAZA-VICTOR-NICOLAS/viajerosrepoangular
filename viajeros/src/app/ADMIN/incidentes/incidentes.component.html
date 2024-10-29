@@ -1,0 +1,90 @@
+<!-- reintegros.component.html -->
+<div class="container">
+    <h2 class="mt-4">Incidentes</h2>
+    <p>Incidentes en viajes reclamados</p>
+    <hr class="my-4">
+    <div class="container mt-4">
+        <!-- Botón desplegable para filtrar por estado -->
+        <div class="mb-3">
+            <select class="form-select" [(ngModel)]="filtroEstado" (change)="filtrarPorEstado()">
+                <option value="">Todos</option>
+                <option value="PENDIENTE">Pendiente</option>
+                <option value="RESUELTO">Resuelto</option>
+                <option value="EN_PROGRESO">En Progreso</option>
+                <option value="RECHAZADO">Rechazado</option>
+            </select>
+        </div>
+
+        <!-- Tabla de Incidentes -->
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID Incidente</th>
+                    <th>Denunciante</th>
+                    <th>Denunciado</th>
+                    <th>Comentarios</th>
+                    <th>Tipo Incidente</th>
+                    <th>Rol denunciado</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let incidente of incidentesFiltrados">
+                    <td>{{ incidente.idIncidente }}</td>
+                    <td>{{ incidente.nombreCompletoDenunciante }}</td>
+                    <td>{{ incidente.nombreCompletoDenunciado }}</td>
+                    <td>{{ incidente.comentarios }}</td>
+
+                    <td>{{ incidente.tipoIncidente }}</td>
+                    @if (incidente.isPasajero) {
+                    <td>PASAJERO</td>
+                    }@else {
+                    <td>CHOFER</td>
+                    }
+
+
+
+                    <td>{{ incidente.estado }}</td>
+                    <td>
+                        <button type="button" class="btn btn-warning" data-bs-toggle="modal"
+                            data-bs-target="#resolverModal" (click)="selectIncidente(incidente)">
+                            Resolver
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal de Resolución -->
+    <div class="modal fade" id="resolverModal" tabindex="-1" aria-labelledby="resolverModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="resolverModalLabel">Resolver Incidente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="estadoResolucion" class="form-label">Estado de Resolución:</label>
+                        <select id="estadoResolucion" class="form-select" [(ngModel)]="estadoResolucion">
+                            <option value="PENDIENTE">Pendiente</option>
+                            <option value="RESUELTO">Resuelto</option>
+                            <option value="EN_PROGRESO">En Progreso</option>
+                            <option value="RECHAZADO">Rechazado</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="resolucion" class="form-label">Comentarios:</label>
+                        <textarea id="resolucion" [(ngModel)]="resolucion" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" (click)="resolverIncidente()">Enviar
+                        Resolución</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -6,6 +6,7 @@ import { LoginService } from '../services/login.service';
 import { HttpClient } from '@angular/common/http';
 import Swal from 'sweetalert2';
 import { LoginResponseDto } from '../models/LoginResponseDto';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 @Component({
   selector: 'app-home',
@@ -22,7 +23,12 @@ export class HomeComponent {
 
   // Inyectar el servicio de login y el router
   constructor(private loginService: LoginService, private router: Router) { }
+  private userRoleSubject = new BehaviorSubject<string | null>(null);
 
+
+  getUserRole(): Observable<string | null> {
+    return this.userRoleSubject.asObservable();
+  }
   onSubmit() {
     this.loginService.login(this.login.username, this.login.pass).subscribe(
       response => {
@@ -30,7 +36,7 @@ export class HomeComponent {
         const userId = response.id;    // Extrae el ID del usuario
         const userName = response.name; // Extrae el nombre del usuario
         const userRol = response.role;
-
+        this.userRoleSubject.next(userRol);
         // Guarda el token, el ID y el nombre en local storage
         this.loginService.saveSessionData(token, userId, userName, userRol);
         this.loginService.saveToken(token); // Guarda el token en local storage

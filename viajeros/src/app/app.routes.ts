@@ -29,6 +29,7 @@ import { ViajesComponent } from './ADMIN/viajes/viajes.component';
 import { ReintegrosComponent } from './ADMIN/reintegros/reintegros.component';
 import { SenasComponent } from './ADMIN/senas/senas.component';
 import { StadisticsComponent } from './ADMIN/stadistics/stadistics.component';
+import { IncidentesComponent } from './ADMIN/incidentes/incidentes.component';
 
 export const routes: Routes = [{
     path: 'home',
@@ -162,6 +163,17 @@ export const routes: Routes = [{
     component: StadisticsComponent,
     canActivate: [adminGuard],
 },
+{
+    path: 'admin/incidentes',
+    component: IncidentesComponent,
+    canActivate: [adminGuard],
+},
+{
+    path: 'edit-trip/:id',
+    component: NewTripComponent
+},
+
+
 {
     path: '',
     component: HomeComponent

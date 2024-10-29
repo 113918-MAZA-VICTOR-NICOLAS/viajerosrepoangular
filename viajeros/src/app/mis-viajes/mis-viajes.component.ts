@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { GoogleMapsComponent } from "../google-maps/google-maps.component";
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SearchResultMatchDto } from '../models/Viajes/SearchResultMatchDto';
 import { ViajeService } from '../services/viaje.service';
@@ -8,10 +8,16 @@ import * as bootstrap from 'bootstrap'; // Importa Bootstrap JS
 import { GeocodingService } from '../services/geocoding.service';
 import Swal from 'sweetalert2';
 import { PassengersDto } from '../models/Viajes/PassengersDto';
+import { FormsModule } from '@angular/forms';
+import { EstadoResolucion, IncidenteDto, TipoIncidente } from '../models/Viajes/IncidenteDto';
+import { IncidentesService } from '../services/incidentes.service';
+import { ValuationService } from '../services/valuation.service';
+import { ValuationRequestDto } from '../models/Valuations/ValuationRequestDto';
+import { Observable } from 'rxjs';
 @Component({
   selector: 'app-mis-viajes',
   standalone: true,
-  imports: [GoogleMapsComponent, RouterLink, CommonModule],
+  imports: [GoogleMapsComponent, RouterLink, CommonModule, FormsModule],
   templateUrl: './mis-viajes.component.html',
   styleUrl: './mis-viajes.component.css'
 })
@@ -33,18 +39,84 @@ export class MisViajesComponent implements OnInit {
   isChofer: boolean = false;
   isChoferCard: boolean = false;
   passengers: PassengersDto[] = [];
-  userId:number = 0;
-  constructor(private cdr: ChangeDetectorRef, private viajesService: ViajeService, private geocodingService: GeocodingService) { }
+  userId: number = 0;
+  ratings: { [passengerId: number]: number } = {};
+  comments: { [passengerId: number]: string } = {};
+
+
+  driverRating: number = 0;
+  driverComments: string = '';
+
+  choferRated: boolean = false;
+
+  // Variables para el Reporte de Incidente
+  incident: IncidenteDto = {
+    idIncidente: 0,            // Inicializa con 0 o un valor inicial si es nuevo
+    viajeId: 0,                // ID del viaje relacionado
+    descripcion: '',           // Descripción inicial en blanco
+    tipoIncidente: TipoIncidente.OTRO,  // Valor inicial del enum `TipoIncidente`
+    fechaIncidente: new Date(),         // Fecha actual del incidente
+    isPasajero: true,           // Valor booleano: es pasajero o chofer
+    denunciadoId: 0,            // ID del usuario denunciado, 0 como valor inicial
+    reportadoPorId: 0,          // ID del usuario que reporta el incidente, 0 como valor inicial
+    estadoResolucion: EstadoResolucion.PENDIENTE, // Valor predeterminado del estado de resolución
+    resolucion: '',            // Resolución inicial en blanco (opcional)
+    fechaResolucion: undefined  // Fecha de resolución, undefined porque es opcional
+  };
+  tipoIncidenteOptions = Object.values(TipoIncidente); // Convierte el enum en un array de valores
+  // El array para almacenar las calificaciones de los pasajeros
+  valuations: ValuationRequestDto[] = [];
+
+
+  constructor(private cdr: ChangeDetectorRef, private valuationService: ValuationService, private router: Router, private viajesService: ViajeService, private geocodingService: GeocodingService, private incidenteservice: IncidentesService) { }
 
   ngOnInit(): void {
     const id = localStorage.getItem('userId');
-    if(id){
-      this.userId = parseInt(id,10);
+    if (id) {
+      this.userId = parseInt(id, 10);
     }
     this.loadTrips();
 
   }
-  getPassengers(tripid:number): void {
+  round(value: number): number {
+    return Math.round(value);
+  }
+  editTrip() {
+    // Obtén el modal por su ID
+    const modalElement = document.getElementById('tripDetailsModal');
+
+    // Verifica si el modal existe antes de intentar cerrarlo
+    if (modalElement) {
+      const modalInstance = bootstrap.Modal.getInstance(modalElement);
+
+      // Verifica si se encontró una instancia del modal
+      if (modalInstance) {
+        modalInstance.hide(); // Cierra el modal
+      }
+    }
+    if (this.selectedTrip) {
+      // Redirige al componente de edición
+      this.router.navigate(['/edit-trip', this.selectedTrip.tripId]);
+    }
+
+  }
+
+  // En tu componente
+  // En tu componente
+  ischoferrated() {
+    if(this.selectedTrip){
+
+    // Directamente devuelve el Observable desde el servicio sin suscribirse aquí
+    this.valuationService.hasPassengerBeenRated(this.selectedTrip.tripId, this.userId).subscribe(
+      (next)=>{this.choferRated = next},
+      (error)=>{console.log(error)}
+    );
+
+    }
+  }
+
+
+  getPassengers(tripid: number): void {
     this.viajesService.getPassengersByTripId(tripid).subscribe(
       (data: PassengersDto[]) => {
         this.passengers = data;
@@ -54,19 +126,250 @@ export class MisViajesComponent implements OnInit {
       }
     );
   }
-  finalizarViaje(trip: SearchResultMatchDto) {
-    this.viajesService.finalizarViaje(trip.tripId).subscribe({
-      next: (response) => {
-        Swal.fire('¡Viaje finalizado!', 'El viaje ha sido finalizado correctamente.', 'success');
-        this.loadTrips();  // Recargar los viajes actualizados
+
+
+  finalizarViaje(trip: SearchResultMatchDto): void {
+    this.selectedTrip = trip;
+
+    // Cargar los pasajeros asociados al viaje
+    this.getPassengers(trip.tripId);
+
+    // Abrir el modal de calificación
+    const modalElement = document.getElementById('ratingModal');
+    if (modalElement) {
+      const modalInstance = new bootstrap.Modal(modalElement);
+      modalInstance.show();
+    }
+  }
+
+
+  assignRating(passenger: PassengersDto, rating: number) {
+    this.ratings[passenger.id] = rating; // Asegúrate de actualizar el objeto ratings
+    this.cdr.detectChanges(); // Fuerza la actualización de la vista si es necesario
+
+    // Ahora también actualizamos valuations si es necesario
+    const index = this.valuations.findIndex(v => v.idUserValuated === passenger.id);
+    if (index !== -1) {
+      this.valuations[index].rating = rating; // Actualiza el rating en valuations si ya existe
+    } else {
+      // Si no existe en valuations, añade un nuevo objeto
+      this.valuations.push({
+        idTrip: this.selectedTrip?.tripId ?? 0,
+        idUserValuated: passenger.id,
+        idUserWhoValuated: this.userId,
+        rating: rating,
+        comments: this.comments[passenger.id] || '' // Usa los comentarios existentes o cadena vacía si no hay
+      });
+    }
+  }
+
+
+  // Obtiene la calificación del pasajero
+  // Obtiene la calificación del pasajero desde valuations
+  getPassengerRating(passengerId: number): number {
+    const valuation = this.valuations.find(v => v.idUserValuated === passengerId);
+    return valuation ? valuation.rating : 0;
+  }
+
+
+  // Asigna comentarios para el pasajero
+  setPassengerComments(passengerId: number, comments: string): void {
+    this.comments[passengerId] = comments;
+  }
+
+  // Obtiene los comentarios del pasajero
+  getPassengerComments(passengerId: number): string {
+    return this.comments[passengerId] || '';
+  }
+
+
+  idselectedtrip!: number;
+  // Método para enviar las calificaciones y finalizar el viaje
+  // Enviar las calificaciones
+  submitRatings(): void {
+    if (this.selectedTrip) {
+      this.idselectedtrip = this.selectedTrip.tripId
+    }
+
+    console.log('ratings', this.ratings)
+    console.log('passengers', this.passengers.length)
+    if (Object.keys(this.ratings).length === this.passengers.length) {
+      this.passengers.forEach(passenger => {
+        const rating = this.ratings[passenger.id];
+        const comments = this.comments[passenger.id] || '';
+
+        // Crea el DTO para cada valoración
+        const valuation: ValuationRequestDto = {
+          idTrip: this.idselectedtrip,
+          idUserValuated: passenger.id,
+          idUserWhoValuated: this.userId,
+          rating: rating,
+          comments: comments
+        };
+
+        // Envía la valoración (llama al servicio para cada pasajero)
+        this.valuationService.submitValuation(valuation).subscribe({
+          next: (response) => {
+            console.log('Valoración enviada correctamente');
+          },
+          error: (error) => {
+            console.error('Error al enviar valoración:', error);
+          }
+        });
+      });
+
+      // Finaliza el viaje después de calificar a todos los pasajeros
+      this.finalizarViajeVal();
+    } else {
+      Swal.fire('Error', 'Debes calificar a todos los pasajeros antes de finalizar el viaje.', 'error');
+    }
+  }
+  openRatingModal(trip: SearchResultMatchDto): void {
+    this.selectedTrip = trip;  // Asigna el viaje seleccionado
+    this.soychofer(trip.tripId)
+    this.getPassengersVal(trip.tripId);  // Carga los pasajeros
+  }
+
+  getPassengersVal(tripId: number): void {
+    this.viajesService.getPassengersByTripId(tripId).subscribe({
+      next: (data: PassengersDto[]) => {
+        this.passengers = data;
+        console.log(this.passengers)
+
+        if (this.passengers.length == 0) {
+          // Si no hay pasajeros, finaliza directamente el viaje
+          if (this.selectedTrip)
+            this.finalizarViajeVal();
+        } else {
+          // Si hay pasajeros, abre el modal de calificación
+          const modalElement = document.getElementById('ratingModal');
+          if (modalElement) {
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+          }
+        }
       },
       error: (error) => {
-        console.error('Error al finalizar el viaje:', error);
-        Swal.fire('Error', 'No se pudo finalizar el viaje. Intenta de nuevo más tarde.', 'error');
+        console.error('Error al obtener los pasajeros:', error);
+        Swal.fire('Error', 'No se pudo obtener la lista de pasajeros. Intenta de nuevo más tarde.', 'error');
       }
     });
   }
+
+  openRatingChoferModal(trip: SearchResultMatchDto): void {
+    this.selectedTrip = trip;
+    this.resetRating();
   
+    // Obtén el modal que quieres cerrar
+    const tripDetailsModalElement = document.getElementById('tripDetailsModal');
+    if (tripDetailsModalElement) {
+      const tripDetailsModal = bootstrap.Modal.getInstance(tripDetailsModalElement);
+      
+      // Función para abrir el modal de calificación
+      const openRatingModal = () => {
+        const ratingDriverModalElement = document.getElementById('ratingDriverModal');
+        if (ratingDriverModalElement) {
+          const ratingDriverModal = new bootstrap.Modal(ratingDriverModalElement);
+          ratingDriverModal.show();
+        }
+      };
+  
+      // Cierra el modal y luego abre el nuevo modal
+      if (tripDetailsModal) {
+        tripDetailsModal.hide();
+  
+        // Espera a que se cierre el modal antes de abrir el otro
+        tripDetailsModalElement.addEventListener('hidden.bs.modal', openRatingModal, { once: true });
+      } else {
+        // Si el modal no se ha inicializado, simplemente abre el nuevo modal
+        openRatingModal();
+      }
+    } else {
+      // Si no existe el modal de detalles del viaje, abre directamente el de calificar al chofer
+      this.showRatingDriverModal();
+    }
+  }
+  
+  // Método auxiliar para mostrar el modal de calificar al chofer
+  showRatingDriverModal(): void {
+    const ratingDriverModalElement = document.getElementById('ratingDriverModal');
+    if (ratingDriverModalElement) {
+      const ratingDriverModal = new bootstrap.Modal(ratingDriverModalElement);
+      ratingDriverModal.show();
+    }
+  }
+  
+
+  resetRating(): void {
+    this.driverRating = 0;
+    this.driverComments = '';
+  }
+
+  setDriverRating(rating: number): void {
+    this.driverRating = rating;
+  }
+
+  submitDriverRating(): void {
+    if (!this.selectedTrip?.tripId) {
+      return; // Guard clause if no trip selected
+    }
+
+    const valuation: ValuationRequestDto = {
+      idTrip: this.selectedTrip.tripId,
+      idUserValuated: this.selectedTrip.driverId,
+      idUserWhoValuated: this.userId, // Ensure this is the driver's ID, adjust as needed
+      rating: this.driverRating,
+      comments: this.driverComments
+    };
+
+    this.valuationService.submitValuation(valuation).subscribe({
+      next: (response) => {
+        console.log('Driver rating submitted successfully');
+        this.closeModal('ratingDriverModal');
+      },
+      error: (error) => {
+        console.error('Error submitting driver rating:', error);
+      }
+    });
+
+    this.closeModal('ratingDriverModal');
+  }
+
+  closeModal(modalId: string): void {
+    const modalElement = document.getElementById(modalId);
+    if (modalElement) {
+      const modal = bootstrap.Modal.getInstance(modalElement);
+      if (modal) {
+        modal.hide();
+      } else {
+        console.error('No se encontró una instancia del modal para cerrar.');
+      }
+    } else {
+      console.error('No se encontró el elemento modal para cerrar.');
+    }
+  }
+
+
+  // Método para finalizar el viaje después de las calificaciones
+  finalizarViajeVal(): void {
+    if (this.selectedTrip)
+      this.viajesService.finalizarViaje(this.selectedTrip?.tripId).subscribe({
+        next: () => {
+          Swal.fire('¡Viaje finalizado!', 'El viaje ha sido finalizado correctamente.', 'success');
+          this.loadTrips();  // Recargar los viajes actualizados
+        },
+        error: (error) => {
+          console.error('Error al finalizar el viaje:', error);
+          Swal.fire('Error', 'No se pudo finalizar el viaje. Intenta de nuevo más tarde.', 'error');
+        }
+      });
+  }
+
+
+
+
+
+
 
   soychofer(tripid: number) {
     const userid = localStorage.getItem('userId');
@@ -102,9 +405,13 @@ export class MisViajesComponent implements OnInit {
     return dateArray; // Si ya es Date, lo devolvemos tal cual
   }
   openTripDetails(trip: SearchResultMatchDto) {
+
+
     this.selectedTrip = trip;
     this.soychofer(this.selectedTrip.tripId)
     console.log(this.isChofer)
+
+    this.ischoferrated();
     // Obtener latitud y longitud del origen
     this.geocodingService.getLatLong(trip.origin).subscribe({
       next: (response) => {
@@ -141,16 +448,16 @@ export class MisViajesComponent implements OnInit {
     }
   }
 
-  deleteTripInModal(){
-    if(this.selectedTrip){
+  deleteTripInModal() {
+    if (this.selectedTrip) {
       this.deleteTrip(this.selectedTrip)
     }
-  
-   
+
+
   }
   deleteTrip(tripId: SearchResultMatchDto): void {
     const userId = localStorage.getItem('userId');
-    
+
     // Verifica si el usuario es chofer
     this.viajesService.soyChoferDelViaje(tripId.tripId, parseInt(userId ?? '0', 10)).subscribe(
       (response) => {
@@ -171,7 +478,7 @@ export class MisViajesComponent implements OnInit {
     this.viajesService.getPassengersByTripId(tripId.tripId).subscribe(
       (data: PassengersDto[]) => {
         this.passengers = data;
-  
+
         if (this.passengers.length > 0) {
           // Mostrar advertencia de reintegros
           Swal.fire({
@@ -254,10 +561,10 @@ export class MisViajesComponent implements OnInit {
       }
     });
   }
-  
 
-   // Método para traducir los estados del viaje
-   translateStatus(status: string): string {
+
+  // Método para traducir los estados del viaje
+  translateStatus(status: string): string {
     switch (status) {
       case 'CREATED':
         return 'PENDIENTE';
@@ -269,7 +576,7 @@ export class MisViajesComponent implements OnInit {
         return status; // Devuelve el estado original si no coincide con ninguno de los casos
     }
   }
-  
+
   // Método para eliminar el viaje
   private executeDeleteTrip(tripId: SearchResultMatchDto): void {
     this.viajesService.deleteTrip(tripId.tripId).subscribe({
@@ -313,6 +620,8 @@ export class MisViajesComponent implements OnInit {
           departureTime: this.convertToDate(trip.departureTime),
           arrivalTime: this.convertToDate(trip.arrivalTime)
         }));
+
+        console.log(this.finishedTrips)
       },
       error: (err) => {
         console.error("Error al cargar viajes finalizados:", err);
@@ -354,5 +663,64 @@ export class MisViajesComponent implements OnInit {
   showFinished() {
     this.viewPending = false;
     this.viewFinished = true;
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // Abrir Modal de Reporte de Incidente
+  openIncidentReport(): void {
+    if (!this.selectedTrip) {
+      Swal.fire('Error', 'No se ha seleccionado ningún viaje.', 'error');
+      return; // Salir si no hay un viaje seleccionado
+    }
+
+    this.incident.viajeId = this.selectedTrip.tripId; // Vincular el viaje al incidente
+    this.incident.reportadoPorId = this.userId; // Asignar el usuario que reporta
+    const modalElement = document.getElementById('reportIncidentModal');
+    if (modalElement) {
+      const modal = new bootstrap.Modal(modalElement);
+      modal.show();
+    }
+  }
+
+
+  // Enviar el reporte de incidente
+  submitIncidentReport(): void {
+    // Asignar la fecha actual al reporte
+    if (this.incident.denunciadoId == 0) {
+      this.incident.isPasajero = false;
+      this.incident.denunciadoId == this.selectedTrip?.driverId
+    }
+    this.incident.fechaIncidente = new Date();
+    console.log(this.incident)
+    this.incidenteservice.reportIncident(this.incident).subscribe({
+      next: (response) => {
+        Swal.fire('¡Incidente reportado!', 'El incidente ha sido reportado correctamente.', 'success');
+      },
+      error: (error) => {
+        console.error('Error al reportar el incidente:', error);
+        Swal.fire('Error', 'No se pudo reportar el incidente. Intenta de nuevo más tarde.', 'error');
+      }
+    });
+
+    const modalElement = document.getElementById('reportIncidentModal');
+    if (modalElement) {
+      const modal = bootstrap.Modal.getInstance(modalElement);
+      modal?.hide();
+    }
   }
 }

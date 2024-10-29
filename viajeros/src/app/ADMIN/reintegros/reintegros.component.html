@@ -1,1 +1,116 @@
-<p>reintegros works!</p>
+<!-- reintegros.component.html -->
+
+<div class="container">
+    <h2 class="mt-4">Reintegros</h2>
+    <p>Manipulación de reintegros solicitados</p>
+    <hr class="my-4">
+    <div class="container mt-4">
+        <!-- Botón desplegable para filtrar por estado del reintegro -->
+        <div class="mb-3">
+            <select class="form-select" [(ngModel)]="filtroEstado" (change)="filtrarPorEstado()">
+                <option value="">Todos</option>
+                <option value="NULL">No Solicitado</option>
+                <option value="REQUIRED">Reintegro Solicitado</option>
+                <option value="RETURNED">Reintegro Completado</option>
+                <option value="REJECTED">Reintegro Rechazado</option>
+            </select>
+        </div>
+
+        <!-- Tabla de Reintegros -->
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID Reintegro</th>
+                    <th>Status</th>
+                    <th>Admin Reintegro</th>
+                    <th>Fecha Reintegro</th>
+                    <th>Motivo Reintegro</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let reintegro of reintegrosFiltrados">
+                    <td>{{ reintegro.idReintegro }}</td>
+                    <td>{{ translateStatus(reintegro.status) }}</td>
+                    <td>{{ reintegro.nombreAdminReintegro }}</td>
+                    <td>{{ reintegro.fechaReintegro | date: 'medium' }}</td>
+                    <td>{{ translateMotivo(reintegro.reintegroMotivo) }}</td>
+                    <td>
+                        <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editReintegroModal"
+                            (click)="openEditModal(reintegro.paymentId, reintegro)">Editar</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<!-- Modal de Edición de Reintegro -->
+<div class="modal fade" id="editReintegroModal" tabindex="-1" aria-labelledby="editReintegroModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editReintegroModalLabel">Editar Reintegro</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" *ngIf="paymentDto">
+                <div class="mb-3">
+                    <label class="form-label">ID del Pago:</label>
+                    <input type="text" class="form-control" [(ngModel)]="paymentDto.idPayment" readonly>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">ID de MercadoPago:</label>
+                    <input type="text" class="form-control" [(ngModel)]="paymentDto.paymentId" readonly>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Referencia Externa:</label>
+                    <input type="text" class="form-control" [(ngModel)]="paymentDto.externalReference" readonly>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Tipo de Pago:</label>
+                    <input type="text" class="form-control" [(ngModel)]="paymentDto.paymentType" readonly>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">ID de Orden del Comerciante:</label>
+                    <input type="text" class="form-control" [(ngModel)]="paymentDto.merchantOrderId" readonly>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Nombre del Pasajero:</label>
+                    <input type="text" class="form-control" [(ngModel)]="paymentDto.nombreCompletoPasajero" readonly>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">CUIL del Pasajero:</label>
+                    <input type="text" class="form-control" [(ngModel)]="paymentDto.cuilPasajero" readonly>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">CBU del Pasajero:</label>
+                    <input type="text" class="form-control" [(ngModel)]="paymentDto.cbuPasajero" readonly>
+                </div>
+                <!-- Fecha de Pago con uso correcto de pipe en un atributo de sólo lectura -->
+                <div class="mb-3">
+                    <label class="form-label">Fecha de Pago:</label>
+                    <input type="text" class="form-control" [value]="paymentDto.fechaPago | date:'longDate'" readonly>
+                </div>
+
+                <form (ngSubmit)="submitUpdate()">
+                    <div class="mb-3">
+                      <label for="estado">Nuevo Estado:</label>
+                      <select id="estado" [(ngModel)]="updateDto.nuevoEstado" name="estado" class="form-control">
+                        <option value="REQUIRED">Reintegro Solicitado</option>
+                        <option value="RETURNED">Reintegro Completado</option>
+                        <option value="REJECTED">Reintegro Rechazado</option>
+                      </select>
+                    </div>
+                 
+                  </form>
+              
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" (click)="submitUpdate()">Guardar
+                    Cambios</button>
+            </div>
+        </div>
+    </div>
+</div>

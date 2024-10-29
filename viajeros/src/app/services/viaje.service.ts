@@ -6,6 +6,7 @@ import { ViajesRequestMatchDto } from '../models/Viajes/ViajesRequestMatchDto';
 import { SearchResultMatchDto } from '../models/Viajes/SearchResultMatchDto';
 import { IsChoferDto } from '../models/Chat/IsChoferDto';
 import { PassengersDto } from '../models/Viajes/PassengersDto';
+import { IncidenteDto } from '../models/Viajes/IncidenteDto';
 
 @Injectable({
   providedIn: 'root'
@@ -124,8 +125,20 @@ export class ViajeService {
   }
   finalizarViaje(tripId: number): Observable<any> {
     const headers = this.getAuthHeaders();
-  
-    return this.http.post(`${this.apiUrl}/${tripId}/finalizar`, {}, { headers, responseType: 'text' as 'json'  });
+
+    return this.http.post(`${this.apiUrl}/${tripId}/finalizar`, {}, { headers, responseType: 'text' as 'json' });
   }
-  
+  // Método para obtener el viaje por su ID
+  getTripByIdForEdit(tripId: number): Observable<NewTripRequestDto> {
+    const headers = this.getAuthHeaders();
+    return this.http.get<NewTripRequestDto>(`${this.apiUrl}/getEdit/${tripId}`, { headers });
+  }
+
+  updateTrip(tripId: number, tripData: NewTripRequestDto): Observable<any> {
+    const headers = this.getAuthHeaders(); // Obtenemos los headers con el token
+    const url = `${this.apiUrl}/trip/${tripId}`; // URL del endpoint de actualización
+    return this.http.put<any>(url, tripData, { headers });
+  }
+
+
 }

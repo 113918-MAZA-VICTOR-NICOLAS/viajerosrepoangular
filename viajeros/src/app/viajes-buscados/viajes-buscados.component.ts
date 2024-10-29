@@ -80,7 +80,9 @@ export class ViajesBuscadosComponent implements OnInit {
     return trips.filter(trip => !this.matchListrip.some(matchTrip => matchTrip.tripId === trip.tripId))
       .map(trip => this.processTrips([trip])[0]);
   }
-
+  round(value: number): number {
+    return Math.round(value);
+  }
   openTripDetails(trip: SearchResultMatchDto) {
     this.selectedTrip = trip;
     const modalElement = document.getElementById('tripDetailsModal');

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { VehicleService } from '../services/vehicle.service';
 import { Router, RouterLink } from '@angular/router';
@@ -11,6 +11,7 @@ import { ViajeService } from '../services/viaje.service';
 import { routes } from '../app.routes';
 import { GoogleMapsComponent } from "../google-maps/google-maps.component";
 import { GeocodingService } from '../services/geocoding.service';
+import { SearchResultMatchDto } from '../models/Viajes/SearchResultMatchDto';
 declare var bootstrap: any;  // Declarar 'bootstrap' como variable global
 @Component({
   selector: 'app-new-trip',
@@ -20,7 +21,13 @@ declare var bootstrap: any;  // Declarar 'bootstrap' como variable global
   styleUrl: './new-trip.component.css'
 })
 export class NewTripComponent implements OnInit {
- 
+
+  @Input() set id(id: string) {
+
+    this.tripId = parseInt(id, 10)
+    this.isEditing = true;
+    console.log("aca input", this.tripId)
+  }
   originLat = -34.6037; // Coordenada de ejemplo (Buenos Aires)
   originLng = -58.3816;
 
@@ -42,6 +49,13 @@ export class NewTripComponent implements OnInit {
   localidadesDestino: { id: number, nombre: string }[] = [];
   vehiculos: CarResponseDto[] = []; // Almacena los vehículos del usuario
   vehicle!: CarResponseDto;
+
+
+  isEditing: boolean = false; // Indica si estamos en modo edición
+  tripId: number | null = null; // Almacena el ID del viaje a editar si aplica
+  editTrip!: SearchResultMatchDto;
+
+
   constructor(
     private fb: FormBuilder,
     private vehicleService: VehicleService,
@@ -65,7 +79,91 @@ export class NewTripComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadUserVehicles();
+    if (this.tripId) {
+
+      this.loadTripData(this.tripId);
+    }
   }
+  loadTripData(tripId: number): void {
+    // Obtener los datos del viaje por su ID
+    this.viajeservice.getTripByIdForEdit(tripId).subscribe({
+      next: (trip) => {
+        let fechaHoraInicio = '';
+
+        // Verifica si trip.fechaHoraInicio es un array válido
+        if (Array.isArray(trip.fechaHoraInicio) && trip.fechaHoraInicio.length === 5) {
+          // Crear el objeto Date usando los valores del array: [año, mes (0-based), día, hora, minuto]
+          const date = new Date(
+            trip.fechaHoraInicio[0],   // Año
+            trip.fechaHoraInicio[1] - 1, // Mes (restamos 1 porque en JavaScript los meses son 0-based)
+            trip.fechaHoraInicio[2],   // Día
+            trip.fechaHoraInicio[3],   // Hora
+            trip.fechaHoraInicio[4]    // Minutos
+          );
+
+          // Verifica si la fecha es válida
+          if (!isNaN(date.getTime())) {
+            fechaHoraInicio = date.toISOString().slice(0, 16); // Formato correcto para el campo datetime-local
+          } else {
+            console.error('Fecha inválida recibida:', trip.fechaHoraInicio);
+            Swal.fire('Error', 'La fecha del viaje no es válida.', 'error');
+          }
+        } else {
+          console.error('Formato de fecha no esperado:', trip.fechaHoraInicio);
+        }
+
+        // Llenar los datos del formulario con los valores del viaje
+        this.createTripForm.patchValue({
+          idVehiculo: trip.idVehiculo,
+          localidadInicioId: trip.localidadInicioId,
+          origen: '',  // Inicialmente vacío hasta obtener la localidad
+          localidadFinId: trip.localidadFinId,
+          destino: '',  // Inicialmente vacío hasta obtener la localidad
+          fechaHoraInicio: fechaHoraInicio,
+          gastoTotal: trip.gastoTotal,
+          asientosDisponibles: trip.asientosDisponibles,
+          aceptaMascotas: trip.aceptaMascotas,
+          aceptaFumar: trip.aceptaFumar
+        });
+
+        // Obtener el nombre del origen (localidadInicioId)
+        this.localidadService.getLocalidadById(trip.localidadInicioId).subscribe({
+          next: (localidadInicio) => {
+            this.createTripForm.patchValue({ origen: localidadInicio.localidad });
+            this.searchLocalidadOrigen();
+
+            // Obtener el nombre del destino (localidadFinId)
+            this.localidadService.getLocalidadById(trip.localidadFinId).subscribe({
+              next: (localidadFin) => {
+                this.createTripForm.patchValue({ destino: localidadFin.localidad });
+
+                this.searchLocalidadDestino();
+                this.calculateDistanceAndTime();
+              },
+              error: (error) => {
+                console.error('Error al cargar la localidad de destino:', error);
+              }
+            });
+
+
+          },
+          error: (error) => {
+            console.error('Error al cargar la localidad de origen:', error);
+          }
+        });
+
+
+      },
+      error: (err) => {
+        console.error('Error al cargar los datos del viaje:', err);
+        Swal.fire('Error', 'No se pudieron cargar los datos del viaje.', 'error');
+      }
+    });
+
+
+
+  }
+
 
   // Carga los vehículos del usuario
   loadUserVehicles() {
@@ -143,7 +241,7 @@ export class NewTripComponent implements OnInit {
       });
     }
   }
-  
+
   calculateDistanceAndTime() {
     const origen = this.createTripForm.get('origen')?.value;
     const destino = this.createTripForm.get('destino')?.value;
@@ -172,7 +270,7 @@ export class NewTripComponent implements OnInit {
 
   calcularCosto() {
 
-    const distancia = parseInt(this.travelDistance,10)
+    const distancia = parseInt(this.travelDistance, 10)
     if (this.kmPorLitro > 0 && this.precioNafta > 0) {
       this.costoTotal = (distancia / this.kmPorLitro) * this.precioNafta;
     } else {
@@ -180,27 +278,38 @@ export class NewTripComponent implements OnInit {
     }
   }
 
-  
+
   agregarCosto() {
+    this.cerrarModal();
     // Lógica para agregar el costo
     this.createTripForm.patchValue({
       gastoTotal: this.costoTotal
     });
-    
+
     // Llamar a la función que cerrará el modal
-    this.cerrarModal();
+
   }
 
   cerrarModal() {
     // Obtener el modal por su ID
     const modalElement = document.getElementById('exampleModal');
-    
+
     // Verifica si se obtuvo el elemento correctamente
     if (modalElement) {
       const modalInstance = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
       modalInstance.hide();
+
+      // Escuchar el evento de cierre para limpiar el fondo oscuro
+      modalElement.addEventListener('hidden.bs.modal', () => {
+        const modalBackdrop = document.querySelector('.modal-backdrop');
+        if (modalBackdrop) {
+          modalBackdrop.remove(); // Eliminar el backdrop si existe
+        }
+        document.body.style.overflow = 'auto'; // Asegurarse de que el scroll esté habilitado
+      });
     }
   }
+
 
 
 
@@ -275,4 +384,33 @@ export class NewTripComponent implements OnInit {
     }
 
   }
+
+  updateTrip(): void {
+    if (this.createTripForm.valid) {
+      const tripId = this.tripId; // Obtener el ID del viaje desde la ruta
+      const tripData: NewTripRequestDto = {
+        idVehiculo: this.createTripForm.get('idVehiculo')?.value,
+        idChofer: Number(localStorage.getItem('userId')), // ID del chofer desde localStorage
+        localidadInicioId: this.createTripForm.get('localidadInicioId')?.value,
+        localidadFinId: this.createTripForm.get('localidadFinId')?.value,
+        fechaHoraInicio: this.createTripForm.get('fechaHoraInicio')?.value,
+        gastoTotal: this.createTripForm.get('gastoTotal')?.value,
+        asientosDisponibles: this.createTripForm.get('asientosDisponibles')?.value,
+        aceptaMascotas: this.createTripForm.get('aceptaMascotas')?.value,
+        aceptaFumar: this.createTripForm.get('aceptaFumar')?.value
+      };
+      if (tripId)
+        this.viajeservice.updateTrip(tripId, tripData).subscribe({
+          next: (response) => {
+            Swal.fire('Éxito', 'El viaje ha sido actualizado correctamente.', 'success');
+            this.router.navigate(['/profile']); // Redirigir a la página del perfil
+          },
+          error: (error) => {
+            console.error('Error al actualizar el viaje:', error);
+            Swal.fire('Error', 'Hubo un problema al actualizar el viaje.', 'error');
+          }
+        });
+    }
+  }
+
 }

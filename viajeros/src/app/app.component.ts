@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { HomeComponent } from "./home/home.component";
 import { RegisterComponent } from "./register/register.component";
@@ -17,24 +17,40 @@ import { LoginService } from './services/login.service';
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'viajeros';
+  userIsAdm: boolean = false;  // Por defecto false
 
-  constructor(private router:Router, private loginService: LoginService){}
+  constructor(private router: Router, private loginService: LoginService) {}
 
-  userIsAdmin(): boolean {
-    const rol = localStorage.getItem('rol');
-    if (rol == 'ADMIN') {
-      return true;
-    } else {
-      return false;
-    }
-
+  ngOnInit(): void {
+    this.loginService.getUserRole().subscribe(role => {
+      if (role) {
+        this.userIsAdm = role === 'ADMIN'; // Actualizar según el rol
+      } else {
+        this.userIsAdm = false; // Si no hay rol, el usuario no es admin
+      }
+    });
   }
+
+  // Función que espera a que el rol esté disponible en localStorage
+  waitForUserRole(): void {
+    const checkRole = () => {
+      const rol = localStorage.getItem('rol');
+      if (rol) {
+        this.userIsAdm = rol === 'ADMIN';
+      } else {
+        setTimeout(checkRole, 100); // Vuelve a intentar en 100ms si el rol no está disponible
+      }
+    };
+
+    checkRole();  // Comienza el ciclo de verificación
+  }
+
+  // Lógica de logout
   logout() {
-    // Aquí pones tu lógica de logout, por ejemplo:
     this.loginService.logout();
-    this.router.navigate(['/login']); // Redirigir al login
+    this.userIsAdm = false;
+    this.router.navigate(['/home']); // Redirigir al home después del logout
   }
-  
 }
