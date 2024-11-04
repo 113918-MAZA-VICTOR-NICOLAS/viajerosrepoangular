@@ -3,10 +3,12 @@ import { Injectable } from '@angular/core';
 import { catchError, map, Observable, throwError } from 'rxjs';
 import { PaymentDto } from '../models/Payments/PaymentsDto';
 import { ResponsePaymentDto } from '../models/Payments/ResponsePaymentDto';
+import { PagoPasajeroDto } from '../models/Admin/PagoPasajeroDto';
 @Injectable({
   providedIn: 'root'
 })
 export class PaymentsService {
+
 
   private apiUrl = 'http://localhost:8080/api/register-payment'; // URL del endpoint
 
@@ -67,5 +69,24 @@ export class PaymentsService {
       return new Date(); // retornar fecha actual como fallback
     }
   }
-  
+  obtenerPagosPasajeros(): Observable<PagoPasajeroDto[]> {
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return throwError(() => new Error('Token no encontrado.'));
+    }
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+    return this.http.get<PagoPasajeroDto[]>(`http://localhost:8080/api/listado-pasajeros`, {headers});
+  }
+
+
+  updateDriverPaymentStatus(requestDriverPaymentDto: { idPago: number; estado: string }) {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return throwError(() => new Error('Token no encontrado.'));
+    }
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.put('http://localhost:8080/api/actualizar-estado', requestDriverPaymentDto, {headers, responseType: 'text'});
+}
 }

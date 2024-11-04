@@ -1,0 +1,7 @@
+.clean{
+    background-color: #e30f0f; /* Fondo gris claro */
+    margin-bottom: 20px;
+    padding: 10px 20px;
+    border-radius: 50px; /* Hace el input redondeado */
+    text-align: end; 
+}

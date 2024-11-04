@@ -16,12 +16,10 @@
         </div>
 
         <!-- Tabla de Incidentes -->
-        <table class="table table-striped">
+        <table class="table table-striped text-center">
             <thead>
                 <tr>
                     <th>ID Incidente</th>
-                    <th>Denunciante</th>
-                    <th>Denunciado</th>
                     <th>Comentarios</th>
                     <th>Tipo Incidente</th>
                     <th>Rol denunciado</th>
@@ -32,8 +30,6 @@
             <tbody>
                 <tr *ngFor="let incidente of incidentesFiltrados">
                     <td>{{ incidente.idIncidente }}</td>
-                    <td>{{ incidente.nombreCompletoDenunciante }}</td>
-                    <td>{{ incidente.nombreCompletoDenunciado }}</td>
                     <td>{{ incidente.comentarios }}</td>
 
                     <td>{{ incidente.tipoIncidente }}</td>
@@ -64,8 +60,15 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="resolverModalLabel">Resolver Incidente</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                 
                 </div>
                 <div class="modal-body">
+                    <div class="mb-4">
+                        <h6>Detalles del Incidente</h6>
+                        <hr>
+                        <p><strong>Denunciante:</strong> {{ incidenteActual?.nombreCompletoDenunciante }}</p>
+                        <p><strong>Nombre del Denunciado:</strong> {{ incidenteActual?.nombreCompletoDenunciado }}</p>
+                    </div>
                     <div class="mb-3">
                         <label for="estadoResolucion" class="form-label">Estado de Resolución:</label>
                         <select id="estadoResolucion" class="form-select" [(ngModel)]="estadoResolucion">

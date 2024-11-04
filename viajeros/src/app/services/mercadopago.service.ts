@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { PreferenceTripDto } from '../models/Payments/PreferenceTripDto';
@@ -33,5 +33,19 @@ export class MercadopagoService {
         onReady: () => { console.log('Checkout ready'); }
       }
     });
+  }
+
+
+  realizarReintegro(paymentId: string, amount?: number): Observable<any> {
+    let url = `http://localhost:8080/api/mercadopago/reintegro/${paymentId}`;
+
+    // Configurar los parámetros si se proporciona un monto
+    let params = new HttpParams();
+    if (amount !== undefined) {
+      params = params.set('amount', amount.toString());
+    }
+
+    // Realizar la solicitud HTTP POST al backend
+    return this.http.post(url, null, { params });
   }
 }

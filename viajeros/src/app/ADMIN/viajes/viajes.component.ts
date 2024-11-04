@@ -5,6 +5,7 @@ import { AdminService } from '../../services/Admin/admin.service';
 import { CommonModule } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartData, ChartOptions, ChartType } from 'chart.js';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-viajes',
@@ -14,6 +15,13 @@ import { ChartData, ChartOptions, ChartType } from 'chart.js';
   styleUrl: './viajes.component.css'
 })
 export class ViajesComponent implements OnInit {
+
+  // Filtra los viajes según el estado seleccionado
+
+  filterOption!: string;
+  startDate!: string;
+  endDate!: string;
+
   viajes: ViajeDto[] = [];  // Lista que contendrá todos los viajes
   filteredViajes: ViajeDto[] = [];  // Lista filtrada que se mostrará en la tabla
   estadoForm: FormGroup;  // Formulario para filtrar por estado
@@ -30,12 +38,60 @@ export class ViajesComponent implements OnInit {
     // Llamada inicial para obtener todos los viajes (sin filtro)
     this.obtenerViajes();
   }
+  buscarPorFecha() {
+    if (!this.startDate || !this.endDate) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Fechas incompletas',
+        text: 'Debes seleccionar ambas fechas de inicio y fin para aplicar el filtro.',
+        confirmButtonText: 'Aceptar'
+      });
+      return;
+    }
+
+    this.adminService.getViajesPorFecha(this.startDate, this.endDate).subscribe(
+      (viajes: ViajeDto[]) => {
+        this.filteredViajes = viajes;
+        console.log('Viajes filtrados por fecha:', this.filteredViajes);
+      },
+      (error) => {
+        console.error('Error al obtener los viajes filtrados por fecha:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Hubo un problema al obtener los viajes. Inténtalo de nuevo.',
+          confirmButtonText: 'Aceptar'
+        });
+      }
+    );
+  }
+
+
+// Método para verificar si la fecha de inicio es válida
+isStartDateValid(): boolean {
+  const today = new Date().toISOString().split('T')[0];
+  return this.startDate <= today;
+}
+
+// Método para verificar si la fecha de fin es válida
+isEndDateValid(): boolean {
+  return this.endDate >= this.startDate;
+}
+
+// Método para verificar si todas las fechas son válidas
+areDatesValid(): boolean {
+  return this.isStartDateValid() && this.isEndDateValid();
+}
 
 
 
-
-
-
+  limpiarFiltros() {
+    this.endDate = '';
+    this.startDate = '';
+    this.filterOption = '';
+    this.searchText = '';
+   this.obtenerViajes()
+  }
 
 
 
@@ -48,15 +104,43 @@ export class ViajesComponent implements OnInit {
   obtenerViajes(estado?: string): void {
     this.adminService.getViajes(estado).subscribe(
       (viajes: ViajeDto[]) => {
-        this.viajes = viajes;
-        console.log(viajes)
-        this.filteredViajes = viajes;  // Inicialmente, muestra todos los viajes
+        this.viajes = viajes.map(viaje => {
+          let startDate: Date;
+
+          if (Array.isArray(viaje.startDate)) {
+            // Construye la fecha a partir del array
+            startDate = new Date(
+              viaje.startDate[0],       // Año
+              viaje.startDate[1] - 1,   // Mes (ajustado ya que los meses en Date van de 0 a 11)
+              viaje.startDate[2],       // Día
+              viaje.startDate[3] || 0,  // Hora (opcional, default 0)
+              viaje.startDate[4] || 0   // Minuto (opcional, default 0)
+            );
+          } else if (typeof viaje.startDate === 'string') {
+            // Si es una cadena en formato ISO, convierte directamente
+            startDate = new Date(viaje.startDate);
+          } else {
+            // En caso de que ya sea un objeto Date o tenga otro tipo
+            startDate = viaje.startDate;
+          }
+
+          return {
+            ...viaje,
+            startDate: startDate  // Asigna el `Date` construido a `startDate`
+          };
+        });
+
+        // Inicialmente muestra todos los viajes en `filteredViajes`
+        this.filteredViajes = [...this.viajes];
+        console.log(this.filteredViajes);
       },
       (error) => {
         console.error('Error al obtener los viajes:', error);
       }
     );
   }
+
+
 
   // Filtra los viajes según el estado seleccionado
   filtrarPorEstado() {

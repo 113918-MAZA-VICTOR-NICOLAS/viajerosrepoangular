@@ -22,7 +22,7 @@
                     onmouseout="this.style.transform='scale(1)'">
 
 
-                    <button *ngIf="selectedTrip?.status == 'CREATED'"
+                    <button *ngIf="trip?.status == 'CREATED'"
                         class="position-absolute top-0 end-0 m-2 d-flex justify-content-center align-items-center"
                         style="background-color: transparent; border: none; width: 2.5rem; height: 2.5rem; border-radius: 50%;"
                         (click)="deleteTrip(trip)">

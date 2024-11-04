@@ -8,6 +8,7 @@ import { PaymentsService } from '../../services/payments.service';
 import { ResponsePaymentDto } from '../../models/Payments/ResponsePaymentDto';
 import { UpdateReintegroDto } from '../../models/Reintegro/UpdateReintegroDto';
 import Swal from 'sweetalert2';
+import { MercadopagoService } from '../../services/mercadopago.service';
 
 @Component({
   selector: 'app-reintegros',
@@ -36,9 +37,9 @@ export class ReintegrosComponent implements OnInit {
     idAdministrador: 123 // Establecer según lógica, por ejemplo, id de sesión del usuario
   };
 
-
+  reintegroAmount: number | undefined;
   constructor(private reintegroService: ReintegroService, private paymentService: PaymentsService,
-    private route: ActivatedRoute) { }
+    private route: ActivatedRoute, private mercadoPagoService: MercadopagoService) { }
 
   ngOnInit(): void {
     this.loadReintegros();
@@ -54,7 +55,14 @@ export class ReintegrosComponent implements OnInit {
       }
     });
   }
+  openReintegroModal(reintegro: ReintegroDto): void {
+    this.idPaymentSelected = reintegro.paymentId;
+    this.reintegroAmount = 10; // Reinicia el monto cuando se abre el modal
+    // Abre el modal usando Bootstrap
 
+
+  }
+  
   openEditModal(idPayment: number, reintegro: ReintegroDto) {
     this.paymentService.getPaymentById(idPayment).subscribe({
       next: (response) => {
@@ -155,6 +163,36 @@ console.log(this.updateDto)
     }
     return dateArray; // Si ya es Date, lo devolvemos tal cual
   }
+
+
+  realizarReintegro(paymentId: string, amount?: number): void {
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Estás por hacer la devolución automática del dinero en la plataforma oficial de Mercado Pago y no hay vuelta atrás. ¿Estás seguro?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, realizar reintegro',
+      cancelButtonText: 'Cancelar',
+      reverseButtons: true
+    }).then((result) => {
+      if (result.isConfirmed) {
+        console.log('ACA ESTAN LOS DATOS DEL REINGREGO', paymentId, amount);
+        this.mercadoPagoService.realizarReintegro(paymentId, amount).subscribe({
+          next: (response) => {
+            console.log('Reintegro realizado con éxito:', response);
+            Swal.fire('Reintegro realizado', 'El reintegro se ha realizado con éxito.', 'success');
+          },
+          error: (error) => {
+            console.error('Error al realizar el reintegro:', error);
+            Swal.fire('Error', 'Hubo un problema al realizar el reintegro.', 'error');
+          }
+        });
+      } else {
+        console.log('Reintegro cancelado por el usuario');
+      }
+    });
+  }
+  
 
 
 }

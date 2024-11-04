@@ -6,6 +6,7 @@ import { IncidenteDto } from '../../models/Viajes/IncidenteDto';
 import { FormsModule } from '@angular/forms';
 import { IncidenteForAdminDto } from '../../models/Incidente/IncidenteForAdminDto';
 import { ResolveIncidenteDto } from '../../models/Incidente/ResolveIncidenteDto';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-incidentes',
@@ -53,24 +54,36 @@ export class IncidentesComponent  implements OnInit {
   }
   resolverIncidente(): void {
     if (!this.incidenteActual) return;
-    
+
     const resolveDto: ResolveIncidenteDto = {
-      idUser: parseInt(this.idUser,10),
-      resolucion: this.resolucion,
-      estadoResolucion: this.estadoResolucion
+        idUser: parseInt(this.idUser, 10),
+        resolucion: this.resolucion,
+        estadoResolucion: this.estadoResolucion
     };
 
     this.incidentesService.resolverIncidente(this.incidenteActual.idIncidente, resolveDto).subscribe({
-      next: () => {
-        alert('Incidente resuelto con éxito');
-        this.cargarIncidentes();
-      },
-      error: (error) => {
-        console.error('Error al resolver el incidente', error);
-      }
+        next: () => {
+            Swal.fire({
+                icon: 'success',
+                title: 'Incidente resuelto',
+                text: 'Incidente resuelto con éxito',
+                confirmButtonText: 'Aceptar'
+            }).then(() => {
+                this.cargarIncidentes(); // Recargar los incidentes después de cerrar el SweetAlert
+            });
+        },
+        error: (error) => {
+            console.error('Error al resolver el incidente', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Hubo un error al resolver el incidente. Inténtelo de nuevo.',
+                confirmButtonText: 'Aceptar'
+            });
+        }
     });
-  }
-  
+}
+
 
   filtrarPorEstado(): void {
     if (!this.filtroEstado) {

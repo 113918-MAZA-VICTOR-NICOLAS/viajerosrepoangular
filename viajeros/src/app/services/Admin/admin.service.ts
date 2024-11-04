@@ -55,4 +55,17 @@ export class AdminService {
     const headers = this.getAuthHeaders();
     return this.http.get<EstadoViajesDto[]>(this.apiUrlEstadoViajes, { headers });
   }
+
+  // Método para obtener los viajes filtrados por rango de fechas
+getViajesPorFecha(startDate: string, endDate: string): Observable<ViajeDto[]> {
+  const headers = this.getAuthHeaders();
+
+  // Agrega los parámetros de fecha
+  const params = new HttpParams()
+      .set('startDate', startDate)
+      .set('endDate', endDate);
+
+  return this.http.get<ViajeDto[]>(`${this.apiUrlViajes}/fecha`, { headers, params });
+}
+
 }

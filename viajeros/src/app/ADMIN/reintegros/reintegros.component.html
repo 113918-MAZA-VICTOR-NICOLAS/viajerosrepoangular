@@ -35,10 +35,25 @@
                     <td>{{ reintegro.nombreAdminReintegro }}</td>
                     <td>{{ reintegro.fechaReintegro | date: 'medium' }}</td>
                     <td>{{ translateMotivo(reintegro.reintegroMotivo) }}</td>
+
                     <td>
-                        <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editReintegroModal"
-                            (click)="openEditModal(reintegro.paymentId, reintegro)">Editar</button>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                Opciones
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#editReintegroModal" (click)="openEditModal(reintegro.paymentId, reintegro)">Cambiar estado</button>
+                                </li>
+                                <li *ngIf="reintegro.status !== 'RETURNED'">
+                                    <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reintegroModal" (click)="openReintegroModal(reintegro)">Reintegrar</button>
+                                </li>
+                                
+                            </ul>
+                        </div>
                     </td>
+                    
+             
                 </tr>
             </tbody>
         </table>
@@ -110,6 +125,36 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" (click)="submitUpdate()">Guardar
                     Cambios</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<!-- Modal para Reintegro -->
+<div class="modal fade" id="reintegroModal" tabindex="-1" aria-labelledby="reintegroModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reintegroModalLabel">Solicitar Reintegro</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">ID del Pago:</label>
+                    <input type="text" class="form-control" [(ngModel)]="idPaymentSelected" readonly>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Monto a Reintegrar:</label>
+                    <input type="number" class="form-control" [(ngModel)]="reintegroAmount" readonly>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" (click)="realizarReintegro(idPaymentSelected.toString(),10)">Confirmar Reintegro</button>
             </div>
         </div>
     </div>
