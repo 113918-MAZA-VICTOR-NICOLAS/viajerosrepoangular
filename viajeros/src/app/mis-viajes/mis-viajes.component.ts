@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { GoogleMapsComponent } from "../google-maps/google-maps.component";
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -23,6 +23,7 @@ import { Observable } from 'rxjs';
 })
 export class MisViajesComponent implements OnInit {
 
+  @ViewChild('ratingModal') ratingModal!: ElementRef;
   originLat = -34.6037; // Coordenada de ejemplo (Buenos Aires)
   originLng = -58.3816;
 
@@ -104,18 +105,24 @@ export class MisViajesComponent implements OnInit {
   // En tu componente
   // En tu componente
   ischoferrated() {
-    if(this.selectedTrip){
+    if (this.selectedTrip) {
 
-    // Directamente devuelve el Observable desde el servicio sin suscribirse aquí
-    this.valuationService.hasPassengerBeenRated(this.selectedTrip.tripId, this.userId).subscribe(
-      (next)=>{this.choferRated = next},
-      (error)=>{console.log(error)}
-    );
+      // Directamente devuelve el Observable desde el servicio sin suscribirse aquí
+      this.valuationService.hasPassengerBeenRated(this.selectedTrip.tripId, this.userId).subscribe(
+        (next) => { this.choferRated = next },
+        (error) => { console.log(error) }
+      );
 
     }
   }
 
-
+  dontHavePassengers(): boolean {
+    if (this.passengers.length == 0) {
+      return true
+    } else {
+      return false
+    }
+  }
   getPassengers(tripid: number): void {
     this.viajesService.getPassengersByTripId(tripid).subscribe(
       (data: PassengersDto[]) => {
@@ -188,17 +195,14 @@ export class MisViajesComponent implements OnInit {
   // Enviar las calificaciones
   submitRatings(): void {
     if (this.selectedTrip) {
-      this.idselectedtrip = this.selectedTrip.tripId
+      this.idselectedtrip = this.selectedTrip.tripId;
     }
 
-    console.log('ratings', this.ratings)
-    console.log('passengers', this.passengers.length)
     if (Object.keys(this.ratings).length === this.passengers.length) {
       this.passengers.forEach(passenger => {
         const rating = this.ratings[passenger.id];
         const comments = this.comments[passenger.id] || '';
 
-        // Crea el DTO para cada valoración
         const valuation: ValuationRequestDto = {
           idTrip: this.idselectedtrip,
           idUserValuated: passenger.id,
@@ -207,9 +211,8 @@ export class MisViajesComponent implements OnInit {
           comments: comments
         };
 
-        // Envía la valoración (llama al servicio para cada pasajero)
         this.valuationService.submitValuation(valuation).subscribe({
-          next: (response) => {
+          next: () => {
             console.log('Valoración enviada correctamente');
           },
           error: (error) => {
@@ -218,8 +221,12 @@ export class MisViajesComponent implements OnInit {
         });
       });
 
-      // Finaliza el viaje después de calificar a todos los pasajeros
       this.finalizarViajeVal();
+
+      // Cierra el modal después de calificar a todos los pasajeros
+      const modalElement = new bootstrap.Modal(this.ratingModal.nativeElement);
+      modalElement.hide();
+
     } else {
       Swal.fire('Error', 'Debes calificar a todos los pasajeros antes de finalizar el viaje.', 'error');
     }
@@ -259,12 +266,12 @@ export class MisViajesComponent implements OnInit {
   openRatingChoferModal(trip: SearchResultMatchDto): void {
     this.selectedTrip = trip;
     this.resetRating();
-  
+
     // Obtén el modal que quieres cerrar
     const tripDetailsModalElement = document.getElementById('tripDetailsModal');
     if (tripDetailsModalElement) {
       const tripDetailsModal = bootstrap.Modal.getInstance(tripDetailsModalElement);
-      
+
       // Función para abrir el modal de calificación
       const openRatingModal = () => {
         const ratingDriverModalElement = document.getElementById('ratingDriverModal');
@@ -273,11 +280,11 @@ export class MisViajesComponent implements OnInit {
           ratingDriverModal.show();
         }
       };
-  
+
       // Cierra el modal y luego abre el nuevo modal
       if (tripDetailsModal) {
         tripDetailsModal.hide();
-  
+
         // Espera a que se cierre el modal antes de abrir el otro
         tripDetailsModalElement.addEventListener('hidden.bs.modal', openRatingModal, { once: true });
       } else {
@@ -289,7 +296,7 @@ export class MisViajesComponent implements OnInit {
       this.showRatingDriverModal();
     }
   }
-  
+
   // Método auxiliar para mostrar el modal de calificar al chofer
   showRatingDriverModal(): void {
     const ratingDriverModalElement = document.getElementById('ratingDriverModal');
@@ -298,7 +305,7 @@ export class MisViajesComponent implements OnInit {
       ratingDriverModal.show();
     }
   }
-  
+
 
   resetRating(): void {
     this.driverRating = 0;
@@ -309,11 +316,12 @@ export class MisViajesComponent implements OnInit {
     this.driverRating = rating;
   }
 
+
   submitDriverRating(): void {
     if (!this.selectedTrip?.tripId) {
       return; // Guard clause if no trip selected
     }
-
+  
     const valuation: ValuationRequestDto = {
       idTrip: this.selectedTrip.tripId,
       idUserValuated: this.selectedTrip.driverId,
@@ -321,19 +329,32 @@ export class MisViajesComponent implements OnInit {
       rating: this.driverRating,
       comments: this.driverComments
     };
-
+  
     this.valuationService.submitValuation(valuation).subscribe({
       next: (response) => {
         console.log('Driver rating submitted successfully');
+        Swal.fire({
+          icon: 'success',
+          title: 'Calificación enviada',
+          text: 'La calificación del conductor ha sido enviada con éxito.',
+          confirmButtonText: 'Aceptar'
+        });
         this.closeModal('ratingDriverModal');
       },
       error: (error) => {
         console.error('Error submitting driver rating:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al enviar calificación',
+          text: 'Ocurrió un problema al enviar la calificación del conductor. Inténtalo nuevamente.',
+          confirmButtonText: 'Aceptar'
+        });
       }
     });
-
-    this.closeModal('ratingDriverModal');
   }
+  
+
+
 
   closeModal(modalId: string): void {
     const modalElement = document.getElementById(modalId);
@@ -410,6 +431,8 @@ export class MisViajesComponent implements OnInit {
     this.selectedTrip = trip;
     this.soychofer(this.selectedTrip.tripId)
     console.log(this.isChofer)
+
+    this.getPassengers(this.selectedTrip.tripId)
 
     this.ischoferrated();
     // Obtener latitud y longitud del origen

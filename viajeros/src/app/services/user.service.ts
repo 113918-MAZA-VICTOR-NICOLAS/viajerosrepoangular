@@ -24,6 +24,30 @@ export class UserService {
 
   passengerId$ = this.passengerIdSubject.asObservable();
 
+  // Método para obtener el token de autenticación
+  private getAuthHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('Token no encontrado.');
+    }
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
+  }
+
+  getUsers(): Observable<UserDataDto[]> {
+    const headers = this.getAuthHeaders();
+
+    return this.http.get<UserDataDto[]>(`http://localhost:8080/api/admin/allusers`, { headers }).pipe(
+      catchError((error) => {
+        console.error('Error al obtener los usuarios:', error);
+        return throwError(() => new Error('Error al obtener los usuarios.'));
+      })
+    );
+  }
+
+
 
   setPassengerId(userId: string) {
 
@@ -33,7 +57,7 @@ export class UserService {
 
   registerNewUser(newuserdata: NewUserDto): Observable<any> {
 
-    
+
     return this.http.post(this.apiUrl + '/register', newuserdata);
   }
 
@@ -196,7 +220,17 @@ export class UserService {
   }
 
 
+  updateRole(userId: number, roleId: number): Observable<void> {
 
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return throwError(() => new Error('Token no encontrado.'));
+    }
+
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.put<void>(`${this.apiUrl}/${userId}/role/${roleId}`, {headers});
+  }
 
 
 }

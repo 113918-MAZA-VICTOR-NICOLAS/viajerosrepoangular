@@ -143,8 +143,8 @@
 
 
 <!-- Modal para calificar al chofer -->
-<div class="modal fade" id="ratingDriverModal" tabindex="-1" aria-labelledby="ratingDriverModalLabel"
-    aria-hidden="true">
+<!-- Modal para calificar al chofer -->
+<div class="modal fade" id="ratingDriverModal" tabindex="-1" aria-labelledby="ratingDriverModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -154,11 +154,13 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label">Calificación:</label>
-                    <div class="rating">
+                    <div class="d-flex justify-content-center align-items-center mb-2">
                         <ng-container *ngFor="let star of [1, 2, 3, 4, 5]">
-                            <i class="bi bi-star"
-                                [ngClass]="{'bi-star-fill': driverRating >= star, 'bi-star': driverRating < star}"
-                                (click)="setDriverRating(star)" style="cursor: pointer; font-size: 2rem;"></i>
+                            <i class="bi bi-star-fill star-icon"
+                               [ngClass]="{'text-warning': driverRating >= star, 'text-muted': driverRating < star}"
+                               (click)="setDriverRating(star)"
+                               style="cursor: pointer; font-size: 2rem; margin-right: 5px;">
+                            </i>
                         </ng-container>
                     </div>
                 </div>
@@ -168,8 +170,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" (click)="submitDriverRating()">Enviar
-                    Calificación</button>
+                <button type="button" class="btn btn-primary" (click)="submitDriverRating()">Enviar Calificación</button>
             </div>
         </div>
     </div>
@@ -255,7 +256,7 @@
             <div class="modal-footer">
                 <!-- Botón de editar con el nuevo método -->
                 <button
-                    *ngIf="isChofer && (selectedTrip?.status !== 'FINISHED' && selectedTrip?.status !== 'IN PROGRESS')"
+                    *ngIf="isChofer && (selectedTrip?.status !== 'FINISHED' && selectedTrip?.status !== 'IN PROGRESS' && dontHavePassengers())"
                     type="button" class="btn btn-blue btn-lg w-100" (click)="editTrip()">
                     Editar
                 </button>
@@ -339,7 +340,7 @@
 
 <!-- Modal para calificar pasajeros -->
 <!-- Modal para calificar pasajeros -->
-<div class="modal fade" id="ratingModal" tabindex="-1" aria-labelledby="ratingModalLabel" aria-hidden="true">
+<div class="modal fade" id="ratingModal" tabindex="-1" aria-labelledby="ratingModalLabel" aria-hidden="true" #ratingModal>
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -376,7 +377,7 @@
 
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" (click)="submitRatings()">Enviar
+                <button type="button" class="btn btn-primary" (click)="submitRatings()" data-bs-dismiss="modal">Enviar
                     Calificaciones</button>
             </div>
         </div>

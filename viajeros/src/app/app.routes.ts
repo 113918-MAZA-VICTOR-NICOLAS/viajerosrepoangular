@@ -30,6 +30,8 @@ import { ReintegrosComponent } from './ADMIN/reintegros/reintegros.component';
 import { SenasComponent } from './ADMIN/senas/senas.component';
 import { StadisticsComponent } from './ADMIN/stadistics/stadistics.component';
 import { IncidentesComponent } from './ADMIN/incidentes/incidentes.component';
+import { VehiculosComponent } from './ADMIN/vehiculos/vehiculos.component';
+import { VehiculosEditComponent } from './ADMIN/vehiculos-edit/vehiculos-edit.component';
 
 export const routes: Routes = [{
     path: 'home',
@@ -166,6 +168,16 @@ export const routes: Routes = [{
 {
     path: 'admin/incidentes',
     component: IncidentesComponent,
+    canActivate: [adminGuard],
+},
+{
+    path: 'admin/vehiculos',
+    component: VehiculosComponent,
+    canActivate: [adminGuard],
+},
+{
+    path: 'admin/vehiculos/:id',
+    component: VehiculosEditComponent,
     canActivate: [adminGuard],
 },
 {

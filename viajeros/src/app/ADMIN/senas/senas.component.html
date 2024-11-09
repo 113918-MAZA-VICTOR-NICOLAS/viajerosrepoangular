@@ -3,6 +3,15 @@
     <p>Detalles de los pagos realizados por los pasajeros y estado de los pagos a los choferes</p>
     <hr class="my-4">
     <div class="container mt-4">
+        <label for="estadoFiltro" class="form-label">Filtrar por Estado Pago Chofer:</label>
+        <select id="estadoFiltro" [(ngModel)]="estadoFiltro" class="form-select">
+          <option value="">Todos</option>
+          <option value="PAID">Pagado</option>
+          <option value="PENDING">Pendiente</option>
+        </select>
+      </div>
+      
+    <div class="container mt-4">
         <!-- Tabla de Pagos de Pasajeros -->
         <table class="table table-striped text-center">
             <thead>
@@ -18,20 +27,21 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let pago of pagos">
-                    <td>{{ pago.idPayment }}</td>
-                    <td>{{ pago.idViaje }}</td>
-                    <td>{{ pago.nombrePasajero }}</td>
-                    <td>{{ pago.monto | currency }}</td>
-                    <td>{{ pago.estadoPagoPasajero }}</td>
-                    <td>{{ pago.nombreChofer }}</td>
-                    <td>{{ pago.estadoPagoChofer }}</td>
-                    <td>
-                        <button class="btn btn-warning" data-bs-toggle="modal"
+                <tr *ngFor="let pago of pagos | filtroEstadoChoferPipe: estadoFiltro">
+                  <td>{{ pago.idPayment }}</td>
+                  <td>{{ pago.idViaje }}</td>
+                  <td>{{ pago.nombrePasajero }}</td>
+                  <td>{{ pago.monto | currency }}</td>
+                  <td>{{ pago.estadoPagoPasajero | translateStatus }}</td>
+                  <td>{{ pago.nombreChofer }}</td>
+                  <td>{{ pago.estadoPagoChofer | translateStatus }}</td>
+                  <td>
+                    <button class="btn btn-warning" data-bs-toggle="modal"
                             data-bs-target="#editPagoModal" (click)="selectPago(pago)">Editar</button>
-                    </td>
+                  </td>
                 </tr>
-            </tbody>
+              </tbody>
+              
         </table>
     </div>
 </div>

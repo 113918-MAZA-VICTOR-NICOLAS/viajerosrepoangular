@@ -4,17 +4,21 @@ import { PaymentsService } from '../../services/payments.service';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import Swal from 'sweetalert2';
+import { TranslateStatusPipe } from "./translate-status.pipe";
+import { FiltroEstadoChoferPipePipe } from "./filtro-estado-chofer-pipe.pipe";
+
 
 @Component({
   selector: 'app-senas',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, TranslateStatusPipe, FiltroEstadoChoferPipePipe],
   templateUrl: './senas.component.html',
   styleUrl: './senas.component.css'
 })
 export class SenasComponent implements OnInit {
 
   paymentForm: FormGroup;
+  estadoFiltro: string = '';
 
 
   pagos: PagoPasajeroDto[] = [];

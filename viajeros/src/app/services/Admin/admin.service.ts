@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { UsuariosPorDiaDto } from '../../models/Admin/UsuariosPorDiaDto';
 import { ViajesPorMesDto } from '../../models/Admin/ViajesPorMesDto';
 import { EstadoViajesDto } from '../../models/Admin/EstadoViajesDto';
+import { CarResponseDto } from '../../models/Vehicle/CarResponseDto';
 
 @Injectable({
   providedIn: 'root'
@@ -66,6 +67,18 @@ getViajesPorFecha(startDate: string, endDate: string): Observable<ViajeDto[]> {
       .set('endDate', endDate);
 
   return this.http.get<ViajeDto[]>(`${this.apiUrlViajes}/fecha`, { headers, params });
+}
+
+
+getAllVehicles(): Observable<CarResponseDto[]> {
+  const headers = this.getAuthHeaders();
+  return this.http.get<CarResponseDto[]>(`http://localhost:8080/api/vehicle/getAllVehicles`,{headers});
+}
+
+
+getVehicleById(id: string): Observable<CarResponseDto> {
+  const headers = this.getAuthHeaders();
+  return this.http.get<CarResponseDto>(`http://localhost:8080/api/vehicle/getCarById/${id}`,{headers});
 }
 
 }

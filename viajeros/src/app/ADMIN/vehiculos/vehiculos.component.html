@@ -1,0 +1,53 @@
+<div class="container">
+    <h2 class="mt-4">Listado de Vehículos</h2>
+    <p>Detalles de la plaza de vehículos</p>
+    <hr class="my-4">
+
+    <!-- Buscador por patente -->
+    <div class="mb-3">
+        <input type="text" class="form-control" [(ngModel)]="patenteFiltro" placeholder="Buscar por patente">
+    </div>
+
+    <div class="container mt-4">
+        <!-- Tabla de Vehículos -->
+        <table class="table table-striped text-center mt-3">
+            <thead>
+                <tr>
+                    <th>ID Vehículo</th>
+                    <th>Marca</th>
+                    <th>Modelo</th>
+                    <th>Patente</th>
+                    <th>Color</th>
+                    <th>Combustible</th>
+                    <th>GNC</th>
+                    <th>Eliminado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let car of listcars | filtroPorPatente: patenteFiltro">
+                    <td>{{ car.idCar }}</td>
+                    <td>{{ car.brand }}</td>
+                    <td>{{ car.model }}</td>
+                    <td>{{ car.patent }}</td>
+                    <td>{{ car.color }}</td>
+                    <td>{{ car.fuel }}</td>
+                    <td>{{ car.gnc ? 'Sí' : 'No' }}</td>
+                    <td>{{ car.deleted ? 'Sí' : 'No' }}</td>
+                    <td>
+                        <!-- Dropdown de acciones -->
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Acciones
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" [routerLink]="['/admin/vehiculos',car.idCar]" (click)="editarVehiculo(car)">Editar</a></li>
+                                <li><a class="dropdown-item text-danger" (click)="eliminarVehiculo(car)">Eliminar</a></li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

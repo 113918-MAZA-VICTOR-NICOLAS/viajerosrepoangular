@@ -86,38 +86,22 @@ export class Vehicle {
     vehicles: Vehicle[];
     pets: Pet[];
     valuations: Valuation[];
-  
-    constructor(
-      idUser: number,
-      name: string,
-      lastname: string,
-      email: string,
-      bank: string,
-      cbu: string,
-      cuil: string,
-      phone: number,
-      deleted: boolean,
-      profileImage: string,
-      registrationDate: Date,
-      vehicles: Vehicle[],
-      pets: Pet[],
-      valuations: Valuation[]
-    ) {
-      this.idUser = idUser;
-      this.name = name;
-      this.lastname = lastname;
-      this.email = email;
-      this.bank = bank;
-      this.cbu = cbu;
-      this.cuil = cuil;
-      this.phone = phone;
-      this.deleted = deleted;
-      this.profileImage = profileImage;
-      this.registrationDate = registrationDate;
-      this.vehicles = vehicles;
-      this.pets = pets;
-      this.valuations = valuations;
-    }
+    constructor() {
+      this.idUser = 0;
+      this.name = '';
+      this.lastname = '';
+      this.email = '';
+      this.bank = '';
+      this.cbu = '';
+      this.cuil = '';
+      this.phone = 0;
+      this.deleted = false;
+      this.profileImage = '';
+      this.registrationDate = new Date();
+      this.vehicles = [];
+      this.pets = [];
+      this.valuations = [];
+  }
     
   }
   

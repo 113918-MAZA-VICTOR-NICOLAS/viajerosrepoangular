@@ -66,21 +66,14 @@ export class ViajesComponent implements OnInit {
     );
   }
 
-
-// Método para verificar si la fecha de inicio es válida
-isStartDateValid(): boolean {
-  const today = new Date().toISOString().split('T')[0];
-  return this.startDate <= today;
-}
-
-// Método para verificar si la fecha de fin es válida
+// Método para verificar si la fecha de fin es mayor o igual a la fecha de inicio
 isEndDateValid(): boolean {
-  return this.endDate >= this.startDate;
+  return !this.startDate || !this.endDate || this.endDate >= this.startDate;
 }
 
 // Método para verificar si todas las fechas son válidas
 areDatesValid(): boolean {
-  return this.isStartDateValid() && this.isEndDateValid();
+  return this.isEndDateValid();
 }
 
 

@@ -20,7 +20,7 @@ import { PaymentsService } from '../services/payments.service';
 export class ProfileComponent {
 
   userSummary: UserSummaryDto | undefined;
-  userdata!: UserDataDto;
+  userdata = new UserDataDto();
   payment: ResponsePaymentDto | null = null;
   error: string | null = null;
 

@@ -278,17 +278,20 @@ export class NewTripComponent implements OnInit {
     }
   }
 
-
   agregarCosto() {
+    // Cerrar el modal
     this.cerrarModal();
-    // Lógica para agregar el costo
+  
+    // Redondear el costo total para asegurar que no hay decimales
+    const costoRedondeado = Math.round(this.costoTotal);
+  
+    // Lógica para agregar el costo redondeado al formulario
     this.createTripForm.patchValue({
-      gastoTotal: this.costoTotal
+      gastoTotal: costoRedondeado
     });
-
-    // Llamar a la función que cerrará el modal
-
+  
   }
+  
 
   cerrarModal() {
     // Obtener el modal por su ID

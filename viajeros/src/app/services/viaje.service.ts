@@ -139,6 +139,9 @@ export class ViajeService {
     const url = `${this.apiUrl}/trip/${tripId}`; // URL del endpoint de actualización
     return this.http.put<any>(url, tripData, { headers });
   }
-
+  getGastoTotalViaje(id: string): Observable<number> {
+    const headers = this.getAuthHeaders();
+    return this.http.get<number>(`${this.apiUrl}/gastototalviaje/${id}`, { headers });
+  }
 
 }

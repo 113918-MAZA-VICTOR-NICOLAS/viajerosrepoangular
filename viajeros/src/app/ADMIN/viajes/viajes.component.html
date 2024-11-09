@@ -49,6 +49,7 @@
           <option value="IN PROGRESS">En Progreso</option>
           <option value="CANCELED">Cancelados</option>
           <option value="FINISHED">Finalizados</option>
+          <option value="DELETED">Eliminados</option>
         </select>
       </form>
     </div>
@@ -57,21 +58,21 @@
   <!-- Filtro por fechas -->
   <div class="row mb-3" *ngIf="filterOption === 'fecha'">
     <div class="col-md-4">
-        <label for="startDate" class="form-label">Fecha de Inicio</label>
-        <input type="date" id="startDate" class="form-control" [(ngModel)]="startDate" (change)="isStartDateValid()" />
-        <small *ngIf="!isStartDateValid()" class="text-danger">La fecha de inicio no puede ser futura.</small>
+      <label for="startDate" class="form-label">Fecha de Inicio</label>
+      <input type="date" id="startDate" class="form-control" [(ngModel)]="startDate" (change)="isEndDateValid()" />
     </div>
     <div class="col-md-4">
-        <label for="endDate" class="form-label">Fecha de Fin</label>
-        <input type="date" id="endDate" class="form-control" [(ngModel)]="endDate" (change)="isEndDateValid()" />
-        <small *ngIf="!isEndDateValid()" class="text-danger">La fecha de fin debe ser mayor a la fecha de inicio.</small>
+      <label for="endDate" class="form-label">Fecha de Fin</label>
+      <input type="date" id="endDate" class="form-control" [(ngModel)]="endDate" (change)="isEndDateValid()" />
+      <small *ngIf="!isEndDateValid()" class="text-danger">La fecha de fin debe ser mayor o igual a la fecha de
+        inicio.</small>
     </div>
     <div class="col-md-4">
-        <label for="endDate" class="form-label">Realizar búsqueda</label>
-        <button class="btn btn-dark w-100" (click)="buscarPorFecha()" [disabled]="!areDatesValid()">Buscar</button>
+      <label for="endDate" class="form-label">Realizar búsqueda</label>
+      <button class="btn btn-dark w-100" (click)="buscarPorFecha()" [disabled]="!areDatesValid()">Buscar</button>
     </div>
   </div>
-  
+
 
   <!-- Tabla de viajes -->
   <table class="table table-striped text-center">
@@ -97,7 +98,7 @@
         </td>
         <td>{{ viaje.origin }}</td>
         <td>{{ viaje.destination }}</td>
-        <td>{{viaje.startDate }}</td>
+        <td>{{viaje.startDate | date }}</td>
         <td>
           <span class="badge" [ngClass]="{
                       'bg-success': viaje.status === 'FINISHED',
