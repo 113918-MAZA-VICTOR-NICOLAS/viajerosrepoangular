@@ -51,10 +51,15 @@ export class SenasComponent implements OnInit {
   }
   cargarPagos(): void {
     this.pagoService.obtenerPagosPasajeros().subscribe({
-      next: (pagos) => this.pagos = pagos,
+      next: (pagos) => {
+        this.pagos = pagos;
+        this.totalPages = Math.ceil(this.pagos.length / this.pageSize);
+        this.updateFilteredPagos();
+      },
       error: (error) => console.error('Error al obtener los pagos de pasajeros', error)
     });
   }
+  
 
   actualizarPago() {
     if (this.paymentForm.invalid) {
@@ -93,4 +98,49 @@ export class SenasComponent implements OnInit {
       }
     );
   }
+
+
+
+  pageSize = 10; // Número de elementos por página
+currentPage = 1; // Página actual
+totalPages = 0; // Total de páginas
+filteredPagos: PagoPasajeroDto[] = []; // Lista filtrada por página
+updateFilteredPagos(): void {
+  const startIndex = (this.currentPage - 1) * this.pageSize;
+  const endIndex = startIndex + this.pageSize;
+  this.filteredPagos = this.pagos.slice(startIndex, endIndex);
+}
+goToPage(page: number): void {
+  if (page >= 1 && page <= this.totalPages) {
+    this.currentPage = page;
+    this.updateFilteredPagos();
+  }
+}
+
+nextPage(): void {
+  if (this.currentPage < this.totalPages) {
+    this.currentPage++;
+    this.updateFilteredPagos();
+  }
+}
+
+previousPage(): void {
+  if (this.currentPage > 1) {
+    this.currentPage--;
+    this.updateFilteredPagos();
+  }
+}
+getPageNumbers(): number[] {
+  const totalPagesToShow = 5; // Número de páginas a mostrar
+  const halfPagesToShow = Math.floor(totalPagesToShow / 2);
+  let startPage = Math.max(this.currentPage - halfPagesToShow, 1);
+  let endPage = Math.min(startPage + totalPagesToShow - 1, this.totalPages);
+
+  if (endPage - startPage < totalPagesToShow - 1) {
+    startPage = Math.max(endPage - totalPagesToShow + 1, 1);
+  }
+
+  return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+}
+
 }

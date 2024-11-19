@@ -92,6 +92,8 @@ export class SubirmeComponent implements OnInit {
 
   // viaje-detail.component.ts
   saldoAPagar(): number {
+    console.log('prueba',this.montototal)
+    console.log('alkak',this.montototal/5)
     return (this.montototal / 5) - 2000;
   }
 

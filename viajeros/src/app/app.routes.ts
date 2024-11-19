@@ -32,6 +32,9 @@ import { StadisticsComponent } from './ADMIN/stadistics/stadistics.component';
 import { IncidentesComponent } from './ADMIN/incidentes/incidentes.component';
 import { VehiculosComponent } from './ADMIN/vehiculos/vehiculos.component';
 import { VehiculosEditComponent } from './ADMIN/vehiculos-edit/vehiculos-edit.component';
+import { FaqsComponent } from './faqs/faqs.component';
+import { TermsComponent } from './terms/terms.component';
+import { EditUserAdComponent } from './ADMIN/edit-user-ad/edit-user-ad.component';
 
 export const routes: Routes = [{
     path: 'home',
@@ -122,6 +125,14 @@ export const routes: Routes = [{
     canActivate: [authGuard],
 },
 {
+    path: 'faqs',
+    component: FaqsComponent,
+},
+{
+    path: 'terms',
+    component: TermsComponent,
+},
+{
     path: 'payment-confirmation',
     component: PaymentConfirmationComponent,
     canActivate: [authGuard],
@@ -143,6 +154,11 @@ export const routes: Routes = [{
 {
     path: 'admin/manage-users',
     component: ManageUsersComponent,
+    canActivate: [adminGuard],
+},
+{
+    path: 'admin/edit-user-ad/:id',
+    component: EditUserAdComponent,
     canActivate: [adminGuard],
 },
 {

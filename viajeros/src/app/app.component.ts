@@ -9,6 +9,7 @@ import { ViajesBuscadosComponent } from "./viajes-buscados/viajes-buscados.compo
 import { CommonModule } from '@angular/common';
 import { UserService } from './services/user.service';
 import { LoginService } from './services/login.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-root',
@@ -47,10 +48,30 @@ export class AppComponent implements OnInit {
     checkRole();  // Comienza el ciclo de verificación
   }
 
-  // Lógica de logout
+ 
+
   logout() {
-    this.loginService.logout();
-    this.userIsAdm = false;
-    this.router.navigate(['/home']); // Redirigir al home después del logout
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Estás a punto de cerrar sesión. ¿Deseas continuar?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, cerrar sesión',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.loginService.logout();
+        this.userIsAdm = false;
+        this.router.navigate(['/home']); // Redirigir al home después del logout
+        Swal.fire(
+          'Sesión cerrada',
+          'Has cerrado sesión exitosamente.',
+          'success'
+        );
+      }
+    });
   }
+  
 }

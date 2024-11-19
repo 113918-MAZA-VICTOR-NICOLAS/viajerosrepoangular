@@ -8,6 +8,7 @@ import Swal from 'sweetalert2';
 import { UserDataDto } from '../models/User/UserDataDto';
 import { UserSummaryDto } from '../models/User/UserSummaryDto';
 import { ResponsePaymentDto } from '../models/Payments/ResponsePaymentDto';
+import { AdminUserUpdateResponseDto } from '../models/Admin/AdminUserUpdateResponseDto';
 
 @Injectable({
   providedIn: 'root'
@@ -39,7 +40,7 @@ export class UserService {
   getUsers(): Observable<UserDataDto[]> {
     const headers = this.getAuthHeaders();
 
-    return this.http.get<UserDataDto[]>(`http://localhost:8080/api/admin/allusers`, { headers }).pipe(
+    return this.http.get<UserDataDto[]>(`http://localhost:8080/api/admin/getAllUsersForAdmin`, { headers }).pipe(
       catchError((error) => {
         console.error('Error al obtener los usuarios:', error);
         return throwError(() => new Error('Error al obtener los usuarios.'));
@@ -229,8 +230,20 @@ export class UserService {
     }
 
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.put<void>(`${this.apiUrl}/${userId}/role/${roleId}`, {headers});
+    return this.http.put<void>(`${this.apiUrl}/${userId}/role/${roleId}`, {}, {headers});
   }
 
 
+
+  
+  getUserDetailsForAdmin(userId: number): Observable<AdminUserUpdateResponseDto> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<AdminUserUpdateResponseDto>(`http://localhost:8080/api/admin/user-details/${userId}`, { headers });
+  }
+  updateUserByAdmin(iduser: number, userDto: AdminUserUpdateResponseDto): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.put(`http://localhost:8080/api/admin/update/${iduser}`, userDto,{ headers, responseType:'text' } )
+  };
 }

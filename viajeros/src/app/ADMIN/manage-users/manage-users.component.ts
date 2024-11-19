@@ -3,87 +3,160 @@ import { UserService } from '../../services/user.service';
 import { UserDataDto } from '../../models/User/UserDataDto';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import Swal from 'sweetalert2';
+import { LoginService } from '../../services/login.service';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-manage-users',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './manage-users.component.html',
   styleUrl: './manage-users.component.css'
 })
 export class ManageUsersComponent implements OnInit {
-changeUserRole() {
-throw new Error('Method not implemented.');
-}
+
+
   users: UserDataDto[] = [];
   filteredUsers: UserDataDto[] = [];
-  filtroEstado: string = '';  // Variable para el filtro de estado (Activo/Inactivo)
+  filtroEstado: string = '';  
   commentblock: string = '';
+  userSelected!: UserDataDto;
+  rolid:number = 0;
 
-  
-  constructor(private userService: UserService) {}
+  constructor(private userService: UserService, private loginservice:LoginService, private router:Router) { }
 
   ngOnInit(): void {
     this.userService.getUsers().subscribe({
       next: (data) => {
-        console.log(data)
         this.users = data;
-        this.filteredUsers = data;
+        this.totalPages = Math.ceil(this.users.length / this.pageSize);
+        this.updateFilteredUsers();
       },
       error: (error) => {
         console.error('Error al cargar los usuarios:', error);
       }
     });
   }
+  
 
-  filtrarPorEstado(): void {
-    if (this.filtroEstado === '') {
-      this.filteredUsers = this.users;
-    } else {
-      const estadoActivo = this.filtroEstado === 'true';
-      this.filteredUsers = this.users.filter(user => user.deleted !== estadoActivo);
+  selectUser(user: UserDataDto) {
+    this.userSelected = user;
+  }
+
+  deleteAccount(user: UserDataDto) {
+
+    this.userSelected = user;
+    if (!this.userSelected) {
+      Swal.fire("Error", "No se ha seleccionado un usuario.", "error");
+      return;
+    }
+  
+    Swal.fire({
+      title: "¿Estás seguro de eliminar lógicamente este usuario?",
+      text: "Este usuario será eliminado lógicamente y podrás recuperarlo más tarde si lo deseas.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí, eliminar"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const userId = this.userSelected.idUser; // Usa el ID del usuario seleccionado
+  
+        // Llamar al servicio para eliminar el usuario lógicamente
+        this.userService.deleteUser(userId).subscribe({
+          next: () => {
+            Swal.fire("¡Eliminado!", "El usuario ha sido eliminado lógicamente.", "success");
+
+          },
+          error: (error) => {
+            Swal.fire("Error", "No se pudo eliminar el usuario. Intente nuevamente más tarde.", "error");
+          }
+        });
+      }
+    });
+  }
+  
+  updateRol() {
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: "¿Deseas cambiar el rol de este usuario?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, cambiar rol',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Llamada al servicio para actualizar el rol
+        this.userService.updateRole(this.userSelected.idUser, this.rolid).subscribe({
+          next: () => {
+            Swal.fire(
+              'Rol Actualizado',
+              'El rol del usuario ha sido cambiado con éxito.',
+              'success'
+            );
+          },
+          error: (error) => {
+            console.error('Error al actualizar el rol:', error);
+            Swal.fire(
+              'Error',
+              'Hubo un problema al cambiar el rol. Inténtalo nuevamente.',
+              'error'
+            );
+          }
+        });
+      }
+    });
+  }
+  
+
+  blockUser() {
+    console.log(this.blockUser)
+  }
+  pageSize = 10; // Número de elementos por página
+  currentPage = 1; // Página actual
+  totalPages = 0; // Total de páginas
+
+  updateFilteredUsers(): void {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.filteredUsers = this.users.slice(startIndex, endIndex);
+  }
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updateFilteredUsers();
     }
   }
-
-
-
-  editarUsuario(user: UserDataDto) {
-    // Lógica para editar usuario
+  
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updateFilteredUsers();
+    }
   }
-
-  eliminarUsuario(user: UserDataDto) {
-    // Lógica para eliminar usuario
+  
+  previousPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updateFilteredUsers();
+    }
   }
-
-  verMascotas(user: UserDataDto) {
-    // Lógica para ver las mascotas del usuario
+  getPageNumbers(): number[] {
+    const totalPagesToShow = 5; // Número de páginas a mostrar
+    const halfPagesToShow = Math.floor(totalPagesToShow / 2);
+    let startPage = Math.max(this.currentPage - halfPagesToShow, 1);
+    let endPage = Math.min(startPage + totalPagesToShow - 1, this.totalPages);
+  
+    if (endPage - startPage < totalPagesToShow - 1) {
+      startPage = Math.max(endPage - totalPagesToShow + 1, 1);
+    }
+  
+    return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
   }
-
-  verVehiculos(user: UserDataDto) {
-    // Lógica para ver los vehículos del usuario
-  }
-
-  verValoraciones(user: UserDataDto) {
-    // Lógica para ver las valoraciones del usuario
-  }
-
-  enviarMensaje(user: UserDataDto) {
-    // Lógica para enviar un mensaje al usuario
-  }
-
-  resetearContrasena(user: UserDataDto) {
-    // Lógica para resetear la contraseña del usuario
-  }
-
-  cambiarRol(user: UserDataDto) {
-    // Lógica para cambiar el rol del usuario
-  }
-
-  bloquearUsuario(user: UserDataDto) {
-    // Lógica para bloquear al usuario
-  }
-  blockUser() {
-   console.log(this.blockUser)
-  }
-
+      
+  
 }

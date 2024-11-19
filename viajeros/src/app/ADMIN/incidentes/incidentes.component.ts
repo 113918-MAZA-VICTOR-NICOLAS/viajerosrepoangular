@@ -40,13 +40,15 @@ export class IncidentesComponent  implements OnInit {
     this.incidentesService.getIncidentesForAdmin().subscribe({
       next: (data) => {
         this.incidentes = data;
-        this.incidentesFiltrados = data;
+        this.totalPages = Math.ceil(this.incidentes.length / this.pageSize);
+        this.updateFilteredIncidentes();
       },
       error: (error) => {
         console.error('Error al cargar los incidentes', error);
       }
     });
   }
+  
   selectIncidente(incidente: IncidenteForAdminDto): void {
     this.incidenteActual = incidente;
     this.resolucion = '';
@@ -92,4 +94,46 @@ export class IncidentesComponent  implements OnInit {
       this.incidentesFiltrados = this.incidentes.filter(incidente => incidente.estado === this.filtroEstado);
     }
   }
+
+  pageSize = 10; // Número de elementos por página
+currentPage = 1; // Página actual
+totalPages = 0; // Total de páginas
+updateFilteredIncidentes(): void {
+  const startIndex = (this.currentPage - 1) * this.pageSize;
+  const endIndex = startIndex + this.pageSize;
+  this.incidentesFiltrados = this.incidentes.slice(startIndex, endIndex);
+}
+goToPage(page: number): void {
+  if (page >= 1 && page <= this.totalPages) {
+    this.currentPage = page;
+    this.updateFilteredIncidentes();
+  }
+}
+
+nextPage(): void {
+  if (this.currentPage < this.totalPages) {
+    this.currentPage++;
+    this.updateFilteredIncidentes();
+  }
+}
+
+previousPage(): void {
+  if (this.currentPage > 1) {
+    this.currentPage--;
+    this.updateFilteredIncidentes();
+  }
+}
+getPageNumbers(): number[] {
+  const totalPagesToShow = 5; // Número de páginas a mostrar
+  const halfPagesToShow = Math.floor(totalPagesToShow / 2);
+  let startPage = Math.max(this.currentPage - halfPagesToShow, 1);
+  let endPage = Math.min(startPage + totalPagesToShow - 1, this.totalPages);
+
+  if (endPage - startPage < totalPagesToShow - 1) {
+    startPage = Math.max(endPage - totalPagesToShow + 1, 1);
+  }
+
+  return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+}
+
 }

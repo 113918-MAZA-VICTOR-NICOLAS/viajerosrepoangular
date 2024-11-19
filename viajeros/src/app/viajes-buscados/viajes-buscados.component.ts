@@ -13,7 +13,7 @@ import Swal from 'sweetalert2';
 @Component({
   selector: 'app-viajes-buscados',
   standalone: true,
-  imports: [GoogleMapsComponent, RouterLink, CommonModule, ChatComponent],
+  imports: [GoogleMapsComponent, RouterLink, CommonModule],
   templateUrl: './viajes-buscados.component.html',
   styleUrl: './viajes-buscados.component.css'
 })
@@ -131,7 +131,7 @@ export class ViajesBuscadosComponent implements OnInit {
             this.originLng = location.lng;
             console.log(`Origen - Latitud: ${this.originLat}, Longitud: ${this.originLng}`);
           } else {
-            Swal.fire('Error', 'No se encontraron resultados para la localidad de origen', 'error');
+            console.log('Error', 'No se encontraron resultados para la localidad de origen', 'error');
           }
         },
         error: (error) => {
@@ -154,7 +154,7 @@ export class ViajesBuscadosComponent implements OnInit {
             this.destinationLng = location.lng;
             console.log(`Destino - Latitud: ${this.destinationLat}, Longitud: ${this.destinationLng}`);
           } else {
-            Swal.fire('Error', 'No se encontraron resultados para la localidad de destino', 'error');
+            console.log('Error', 'No se encontraron resultados para la localidad de destino', 'error');
           }
         },
         error: (error) => {

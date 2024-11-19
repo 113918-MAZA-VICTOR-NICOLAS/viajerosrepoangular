@@ -7,7 +7,7 @@
 
         <form [formGroup]="registerForm" (ngSubmit)="loadNewUser()">
             <div class="p-4">
-        
+
 
                 <div class="text-start mt-4">
                     <label for="name" class="form-label">NOMBRE</label>
@@ -55,7 +55,7 @@
 
                 <div class="text-start mt-4">
                     <label for="telefono" class="form-label mt-2">TELEFONO</label>
-                    <input formControlName="phone" type="text" class="form-control mb-0" [ngClass]="{
+                    <input formControlName="phone" type="text" class="form-control mb-3" [ngClass]="{
                          'is-valid': registerForm.get('phone')?.valid && registerForm.get('phone')?.touched && registerForm.get('phone')?.value?.toString().length === 10, 
                          'is-invalid': registerForm.get('phone')?.invalid && registerForm.get('phone')?.touched
                        }" required minlength="10" maxlength="10">
@@ -69,12 +69,14 @@
                 }
 
             </div>
-
-            <div class="p-4">
-                <button type="submit" class="btn btn-black btn-lg poppins-bold"
-                    [disabled]="registerForm.invalid">Registrarse</button>
+            <div class="text-start mt-0">
+                <div class="p-4 pt-0">
+                    <button type="submit" class="btn btn-black btn-lg poppins-bold"
+                        [disabled]="registerForm.invalid">Registrarse</button>
+                </div>
             </div>
         </form>
+   
 
 
     </div>

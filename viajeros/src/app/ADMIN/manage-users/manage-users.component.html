@@ -33,17 +33,15 @@
                     <td>
                         <!-- Dropdown de Acciones -->
                         <div class="dropdown">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" id="accionesDropdown"
+                            <button class="btn btn-dark dropdown-toggle" type="button" id="accionesDropdown"
                                 data-bs-toggle="dropdown" aria-expanded="false">
-                                Acciones
+                                
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="accionesDropdown">
-                                <li><a class="dropdown-item" (click)="editarUsuario(user)"  data-bs-toggle="modal" data-bs-target="#roleModal">Editar</a></li>
-                                <li><a class="dropdown-item" (click)="eliminarUsuario(user)">Eliminar</a></li>
-                                <li><a class="dropdown-item" (click)="cambiarRol(user)">Cambiar Rol</a></li>
-                                <li>
-                                    <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#blockUserModal">Bloquear</a>
-                                  </li>
+                                <li><a class="dropdown-item" [routerLink]="['/admin/edit-user-ad',user.idUser]"  >Editar</a></li>
+                                <li><a class="dropdown-item text-danger" (click)="deleteAccount(user)">Eliminar</a></li>
+                                <li><a class="dropdown-item" (click)="selectUser(user)" data-bs-toggle="modal" data-bs-target="#roleModal">Cambiar Rol</a></li>
+                         
                                   
                             </ul>
                         </div>
@@ -84,7 +82,7 @@
 
 
 
-  <!-- Modal -->
+  <!-- Modal ROL-->
 <div class="modal fade" id="roleModal" tabindex="-1" aria-labelledby="roleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -96,7 +94,7 @@
         <form>
           <div class="mb-3">
             <label for="roleSelect" class="form-label">Seleccione el Rol:</label>
-            <select class="form-select" id="roleSelect">
+            <select class="form-select" id="roleSelect" [(ngModel)]="rolid" name="role">
               <option value="1">Administrador</option>
               <option value="2">Usuario</option>
             </select>
@@ -105,8 +103,28 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-        <button type="button" class="btn btn-primary" (click)="changeUserRole()">Guardar Cambios</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="updateRol()">Guardar Cambios</button>
       </div>
     </div>
   </div>
+</div>
+<div class="pagination-controls mt-3 text-center">
+  <nav aria-label="Paginación de usuarios">
+    <ul class="pagination justify-content-center">
+      <!-- Botón de página anterior -->
+      <li class="page-item" [class.disabled]="currentPage === 1">
+        <a class="page-link" (click)="previousPage()">Anterior</a>
+      </li>
+
+      <!-- Números de página -->
+      <li class="page-item" *ngFor="let page of getPageNumbers()" [class.active]="page === currentPage">
+        <a class="page-link" (click)="goToPage(page)">{{ page }}</a>
+      </li>
+
+      <!-- Botón de página siguiente -->
+      <li class="page-item" [class.disabled]="currentPage === totalPages">
+        <a class="page-link" (click)="nextPage()">Siguiente</a>
+      </li>
+    </ul>
+  </nav>
 </div>

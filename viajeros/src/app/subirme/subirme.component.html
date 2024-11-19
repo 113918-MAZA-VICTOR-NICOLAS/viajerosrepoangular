@@ -26,7 +26,12 @@
 
         <div class="my-3 p-3 bg-success text-white rounded-3">
             <h4 class="text-center">Tienes que abonar al chofer personalmente el saldo de:</h4>
-            <h2 class="text-center"><strong>{{ saldoAPagar() | currency:'ARS':'symbol':'1.0-0' }}</strong></h2>
+            @if (montototal !=10000) {
+                <h2 class="text-center"><strong>{{ saldoAPagar() | currency:'ARS':'symbol':'1.0-0' }}</strong></h2>
+            }@else {
+                <h2 class="text-center"><strong>NO CORRESPONDE ABONAR NADA MAS QUE LA SEñA</strong></h2>
+            }
+
         </div>
 
         <!-- Advertencia -->

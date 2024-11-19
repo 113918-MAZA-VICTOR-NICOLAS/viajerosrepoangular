@@ -6,11 +6,13 @@ import { CommonModule } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartData, ChartOptions, ChartType } from 'chart.js';
 import Swal from 'sweetalert2';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 
 @Component({
   selector: 'app-viajes',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, BaseChartDirective],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './viajes.component.html',
   styleUrl: './viajes.component.css'
 })
@@ -26,6 +28,8 @@ export class ViajesComponent implements OnInit {
   filteredViajes: ViajeDto[] = [];  // Lista filtrada que se mostrará en la tabla
   estadoForm: FormGroup;  // Formulario para filtrar por estado
   searchText = '';  // Texto para la búsqueda general
+
+
 
 
   constructor(private formBuilder: FormBuilder, private adminService: AdminService) {
@@ -86,7 +90,20 @@ areDatesValid(): boolean {
    this.obtenerViajes()
   }
 
-
+  generatePDF(): void {
+    const data = document.getElementById('viajesTable'); // Usa el ID que le pondremos a la tabla
+    if (data) {
+      html2canvas(data).then((canvas) => {
+        const imgWidth = 208;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        pdf.addImage(imgData, 'PNG', 0, 10, imgWidth, imgHeight);
+        pdf.save('viajes-listado.pdf');
+      });
+    }
+  }
+  
 
 
 
@@ -121,8 +138,11 @@ areDatesValid(): boolean {
             ...viaje,
             startDate: startDate  // Asigna el `Date` construido a `startDate`
           };
-        });
 
+
+        });
+ this.totalPages = Math.ceil(this.viajes.length / this.pageSize);
+      this.updateFilteredViajes();
         // Inicialmente muestra todos los viajes en `filteredViajes`
         this.filteredViajes = [...this.viajes];
         console.log(this.filteredViajes);
@@ -149,16 +169,33 @@ areDatesValid(): boolean {
   }
 
   // Función para buscar en la tabla
-  searchTable() {
-    const searchTextLower = this.searchText.toLowerCase();
-    this.filteredViajes = this.viajes.filter(viaje =>
-      viaje.driverName.toLowerCase().includes(searchTextLower) ||
-      viaje.passengers.some(passenger => passenger.toLowerCase().includes(searchTextLower)) ||
-      viaje.origin.toLowerCase().includes(searchTextLower) ||
-      viaje.destination.toLowerCase().includes(searchTextLower) ||
-      this.formatDate(viaje.startDate).includes(searchTextLower)
-    );
-  }
+  // Función para buscar en la tabla
+// Función para buscar en la tabla
+searchTable() {
+  const searchTextLower = this.searchText.toLowerCase();
+
+  this.filteredViajes = this.viajes.filter(viaje => {
+    const idMatch = viaje.id ? viaje.id.toString().toLowerCase().includes(searchTextLower) : false;
+    const driverNameMatch = viaje.driverName.toLowerCase().includes(searchTextLower);
+    const passengersMatch = viaje.passengers.some(passenger => passenger.toLowerCase().includes(searchTextLower));
+    const originMatch = viaje.origin.toLowerCase().includes(searchTextLower);
+    const destinationMatch = viaje.destination.toLowerCase().includes(searchTextLower);
+    const formattedDate = this.formatDateFilter(viaje.startDate);
+    const startDateMatch = formattedDate.includes(searchTextLower);
+
+    // Comprobamos si alguno de los campos coincide
+    return idMatch || driverNameMatch || passengersMatch || originMatch || destinationMatch || startDateMatch;
+  });
+}
+formatDateFilter(date: Date): string {
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Sumamos 1 porque los meses en JavaScript son de 0 a 11
+  const year = date.getFullYear();
+
+  return `${day}-${month}-${year}`;
+}
+
+
   // Función para formatear la fecha
   formatDate(dateArray: any): string {
     if (Array.isArray(dateArray) && dateArray.length >= 3) {
@@ -199,4 +236,48 @@ areDatesValid(): boolean {
     }
   }
 
+
+  pageSize = 10; // Número de elementos por página
+  currentPage = 1; // Página actual
+  totalPages = 0; // Total de páginas
+  
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updateFilteredViajes();
+    }
+  }
+  
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updateFilteredViajes();
+    }
+  }
+  
+  previousPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updateFilteredViajes();
+    }
+  }
+  updateFilteredViajes(): void {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.filteredViajes = this.viajes.slice(startIndex, endIndex);
+  }
+  getPageNumbers(): number[] {
+    const totalPagesToShow = 5; // Número máximo de páginas a mostrar en la barra de paginación
+    const halfPagesToShow = Math.floor(totalPagesToShow / 2);
+    let startPage = Math.max(this.currentPage - halfPagesToShow, 1);
+    let endPage = Math.min(startPage + totalPagesToShow - 1, this.totalPages);
+  
+    // Ajusta el inicio si estamos al final de las páginas
+    if (endPage - startPage < totalPagesToShow - 1) {
+      startPage = Math.max(endPage - totalPagesToShow + 1, 1);
+    }
+  
+    return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+  }
+  
 }

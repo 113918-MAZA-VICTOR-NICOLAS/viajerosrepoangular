@@ -39,7 +39,7 @@
                     <td>
                         <div class="btn-group">
                             <button type="button" class="btn btn-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                Opciones
+                                
                             </button>
                             <ul class="dropdown-menu">
                                 <li>
@@ -154,8 +154,29 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" (click)="realizarReintegro(idPaymentSelected.toString(),10)">Confirmar Reintegro</button>
+                <button type="button" class="btn btn-primary" (click)="realizarReintegro(idPaymentSelected.toString(),10) "data-bs-dismiss="modal">Confirmar Reintegro</button>
             </div>
         </div>
     </div>
 </div>
+<div class="pagination-controls mt-3 text-center">
+    <nav aria-label="Paginación de reintegros">
+      <ul class="pagination justify-content-center">
+        <!-- Botón de página anterior -->
+        <li class="page-item" [class.disabled]="currentPage === 1">
+          <a class="page-link" (click)="previousPage()">Anterior</a>
+        </li>
+  
+        <!-- Números de página -->
+        <li class="page-item" *ngFor="let page of getPageNumbers()" [class.active]="page === currentPage">
+          <a class="page-link" (click)="goToPage(page)">{{ page }}</a>
+        </li>
+  
+        <!-- Botón de página siguiente -->
+        <li class="page-item" [class.disabled]="currentPage === totalPages">
+          <a class="page-link" (click)="nextPage()">Siguiente</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+  

@@ -38,14 +38,14 @@ export class MercadopagoService {
 
   realizarReintegro(paymentId: string, amount?: number): Observable<any> {
     let url = `http://localhost:8080/api/mercadopago/reintegro/${paymentId}`;
-
-    // Configurar los parámetros si se proporciona un monto
+  
     let params = new HttpParams();
     if (amount !== undefined) {
       params = params.set('amount', amount.toString());
     }
-
-    // Realizar la solicitud HTTP POST al backend
-    return this.http.post(url, null, { params });
+  
+    // Ajustar la respuesta para tratarla como texto
+    return this.http.post(url, null, { params, responseType: 'text' });
   }
+  
 }

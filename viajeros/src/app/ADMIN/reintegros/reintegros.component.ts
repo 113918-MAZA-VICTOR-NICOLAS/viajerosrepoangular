@@ -116,16 +116,17 @@ console.log(this.updateDto)
       next: (data) => {
         this.reintegros = data.map(reintegro => ({
           ...reintegro,
-          // Utiliza el método convertToDate para convertir el arreglo a un objeto Date
           fechaReintegro: this.convertToDate(reintegro.fechaReintegro)
         }));
-        this.filtrarPorEstado();
+        this.totalPages = Math.ceil(this.reintegros.length / this.pageSize);
+        this.updateFilteredReintegros();
       },
       error: (error) => {
         console.error('Error al cargar los reintegros', error);
       }
     });
   }
+  
   filtrarPorEstado(): void {
     if (!this.filtroEstado) {
       this.reintegrosFiltrados = this.reintegros;
@@ -181,6 +182,8 @@ console.log(this.updateDto)
           next: (response) => {
             console.log('Reintegro realizado con éxito:', response);
             Swal.fire('Reintegro realizado', 'El reintegro se ha realizado con éxito.', 'success');
+
+            this.loadReintegros();
           },
           error: (error) => {
             console.error('Error al realizar el reintegro:', error);
@@ -194,5 +197,47 @@ console.log(this.updateDto)
   }
   
 
-
+  pageSize = 10; // Número de elementos por página
+  currentPage = 1; // Página actual
+  totalPages = 0; // Total de páginas
+  updateFilteredReintegros(): void {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.reintegrosFiltrados = this.reintegros.slice(startIndex, endIndex);
+  }
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updateFilteredReintegros();
+    }
+  }
+  
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updateFilteredReintegros();
+    }
+  }
+  
+  previousPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updateFilteredReintegros();
+    }
+  }
+  getPageNumbers(): number[] {
+    const totalPagesToShow = 5; // Número de páginas a mostrar
+    const halfPagesToShow = Math.floor(totalPagesToShow / 2);
+    let startPage = Math.max(this.currentPage - halfPagesToShow, 1);
+    let endPage = Math.min(startPage + totalPagesToShow - 1, this.totalPages);
+  
+    if (endPage - startPage < totalPagesToShow - 1) {
+      startPage = Math.max(endPage - totalPagesToShow + 1, 1);
+    }
+  
+    return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+  }
+      
+  
+  
 }
