@@ -20,7 +20,6 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>ID Reintegro</th>
                     <th>Status</th>
                     <th>Admin Reintegro</th>
                     <th>Fecha Reintegro</th>
@@ -30,7 +29,6 @@
             </thead>
             <tbody>
                 <tr *ngFor="let reintegro of reintegrosFiltrados">
-                    <td>{{ reintegro.idReintegro }}</td>
                     <td>{{ translateStatus(reintegro.status) }}</td>
                     <td>{{ reintegro.nombreAdminReintegro }}</td>
                     <td>{{ reintegro.fechaReintegro | date: 'medium' }}</td>

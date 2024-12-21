@@ -9,6 +9,7 @@ import { ChatComponent } from "../chat/chat.component";
 import { ChatService } from '../services/chat.service';
 import { GeocodingService } from '../services/geocoding.service';
 import Swal from 'sweetalert2';
+import { PassengersDto } from '../models/Viajes/PassengersDto';
 
 @Component({
   selector: 'app-viajes-buscados',
@@ -83,6 +84,9 @@ export class ViajesBuscadosComponent implements OnInit {
   round(value: number): number {
     return Math.round(value);
   }
+
+
+  soypasajero: boolean = false;
   openTripDetails(trip: SearchResultMatchDto) {
     this.selectedTrip = trip;
     const modalElement = document.getElementById('tripDetailsModal');
@@ -93,6 +97,17 @@ export class ViajesBuscadosComponent implements OnInit {
 
     const userId = localStorage.getItem('userId');
     if (userId) {
+
+      this.viajeservice.getPassengersByTripId(trip.tripId).subscribe(
+        (passengers: PassengersDto[]) => {
+          console.log('idmio', userId);
+          console.log('pasajeros', passengers);
+  const idnumb = parseInt(userId,10);
+          // Verifica si el usuario logueado está en la lista de pasajeros
+          this.soypasajero = passengers.some(passenger => passenger.id === idnumb);
+        },
+        (error) => console.log(error)
+      );
       this.viajeservice.soyChoferDelViaje(trip.tripId, parseInt(userId)).subscribe((response) => {
         this.isChofer = response.ischofer;
       });

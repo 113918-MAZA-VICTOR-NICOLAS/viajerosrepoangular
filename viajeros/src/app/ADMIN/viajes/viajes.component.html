@@ -50,6 +50,7 @@
           <option value="IN PROGRESS">En Progreso</option>
           <option value="FINISHED">Finalizados</option>
           <option value="DELETED">Eliminados</option>
+          <option value="CREATED">Creados</option>
         </select>
       </form>
     </div>
@@ -78,7 +79,6 @@
   <table class="table table-striped text-center"  id="viajesTable">
     <thead>
       <tr>
-        <th scope="col">ID Viaje</th>
         <th scope="col">Nombre del Chofer</th>
         <th scope="col">Pasajeros</th>
         <th scope="col">Origen</th>
@@ -89,7 +89,6 @@
     </thead>
     <tbody>
       <tr *ngFor="let viaje of filteredViajes">
-        <td>{{ viaje.id }}</td>
         <td>{{ viaje.driverName }}</td>
         <td>
           <ul>

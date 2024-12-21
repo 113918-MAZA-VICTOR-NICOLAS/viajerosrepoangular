@@ -19,7 +19,6 @@
         <table class="table table-striped text-center">
             <thead>
                 <tr>
-                    <th>ID Incidente</th>
                     <th>Comentarios</th>
                     <th>Tipo Incidente</th>
                     <th>Rol denunciado</th>
@@ -29,7 +28,6 @@
             </thead>
             <tbody>
                 <tr *ngFor="let incidente of incidentesFiltrados">
-                    <td>{{ incidente.idIncidente }}</td>
                     <td>{{ incidente.comentarios }}</td>
 
                     <td>{{ incidente.tipoIncidente }}</td>
@@ -84,7 +82,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" (click)="resolverIncidente()">Enviar
+                    <button type="button" data-bs-dismiss="modal"  class="btn btn-primary" (click)="resolverIncidente()">Enviar
                         Resolución</button>
                 </div>
             </div>

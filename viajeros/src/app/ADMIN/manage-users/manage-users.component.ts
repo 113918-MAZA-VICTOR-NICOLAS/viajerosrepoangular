@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { UserService } from '../../services/user.service';
 import { UserDataDto } from '../../models/User/UserDataDto';
-import { CommonModule } from '@angular/common';
+import { CommonModule, formatDate } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { LoginService } from '../../services/login.service';
@@ -23,23 +23,59 @@ export class ManageUsersComponent implements OnInit {
   commentblock: string = '';
   userSelected!: UserDataDto;
   rolid:number = 0;
-
+  searchTerm: string = ''; // Nuevo: Término de búsqueda
   constructor(private userService: UserService, private loginservice:LoginService, private router:Router) { }
 
   ngOnInit(): void {
-    this.userService.getUsers().subscribe({
-      next: (data) => {
-        this.users = data;
-        this.totalPages = Math.ceil(this.users.length / this.pageSize);
-        this.updateFilteredUsers();
-      },
-      error: (error) => {
-        console.error('Error al cargar los usuarios:', error);
-      }
-    });
+  this.loadusers()
+
   }
   
+loadusers(){
+  this.userService.getUsers().subscribe({
+    next: (data) => {
+      this.users = data;
+      this.totalPages = Math.ceil(this.users.length / this.pageSize);
+      this.filterUsers(); // Filtrar usuarios después de cargarlos
+    },
+    error: (error) => {
+      console.error('Error al cargar los usuarios:', error);
+    }
+  });
+}
 
+
+
+filterUsers(): void {
+  let filtered = this.users;
+
+  // Filtrar por estado
+  if (this.filtroEstado === 'activo') {
+    filtered = filtered.filter(user => !user.deleted);
+  } else if (this.filtroEstado === 'inactivo') {
+    filtered = filtered.filter(user => user.deleted);
+  }
+
+  // Filtrar por término de búsqueda
+  if (this.searchTerm.trim()) {
+    const term = this.searchTerm.toLowerCase();
+    filtered = filtered.filter(user => {
+      const formattedDate = formatDate(user.registrationDate, 'dd/MM/yyyy', 'en-US').toLowerCase(); // Formatear la fecha
+      return (
+        user.name.toLowerCase().includes(term) ||
+        user.lastname.toLowerCase().includes(term) ||
+        user.email.toLowerCase().includes(term) ||
+        user.phone.toString().toLowerCase().includes(term) ||
+        formattedDate.includes(term) // Comparar la fecha formateada
+      );
+    });
+  }
+
+  this.filteredUsers = filtered.slice(
+    (this.currentPage - 1) * this.pageSize,
+    this.currentPage * this.pageSize
+  );
+}
   selectUser(user: UserDataDto) {
     this.userSelected = user;
   }
@@ -68,6 +104,7 @@ export class ManageUsersComponent implements OnInit {
         this.userService.deleteUser(userId).subscribe({
           next: () => {
             Swal.fire("¡Eliminado!", "El usuario ha sido eliminado lógicamente.", "success");
+            this.loadusers();
 
           },
           error: (error) => {

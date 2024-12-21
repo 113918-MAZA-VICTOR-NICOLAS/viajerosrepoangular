@@ -13,7 +13,6 @@
         <table class="table table-striped text-center mt-3">
             <thead>
                 <tr>
-                    <th>ID Vehículo</th>
                     <th>Marca</th>
                     <th>Modelo</th>
                     <th>Patente</th>
@@ -26,7 +25,6 @@
             </thead>
             <tbody>
                 <tr *ngFor="let car of filteredCars | filtroPorPatente: patenteFiltro">
-                    <td>{{ car.idCar }}</td>
                     <td>{{ car.brand }}</td>
                     <td>{{ car.model }}</td>
                     <td>{{ car.patent }}</td>

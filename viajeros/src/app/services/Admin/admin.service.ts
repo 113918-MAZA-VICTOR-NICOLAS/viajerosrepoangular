@@ -6,6 +6,7 @@ import { UsuariosPorDiaDto } from '../../models/Admin/UsuariosPorDiaDto';
 import { ViajesPorMesDto } from '../../models/Admin/ViajesPorMesDto';
 import { EstadoViajesDto } from '../../models/Admin/EstadoViajesDto';
 import { CarResponseDto } from '../../models/Vehicle/CarResponseDto';
+import { PaymentStadisticDto } from '../../models/Admin/PaymentStadisticDto';
 
 @Injectable({
   providedIn: 'root'
@@ -80,5 +81,11 @@ getVehicleById(id: string): Observable<CarResponseDto> {
   const headers = this.getAuthHeaders();
   return this.http.get<CarResponseDto>(`http://localhost:8080/api/vehicle/getCarById/${id}`,{headers});
 }
+
+getPaymentStatistics(): Observable<PaymentStadisticDto> {
+  const headers = this.getAuthHeaders();
+  return this.http.get<PaymentStadisticDto>('http://localhost:8080/api/statistics',{headers});
+}
+
 
 }
